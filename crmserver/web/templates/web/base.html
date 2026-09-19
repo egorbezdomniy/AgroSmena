@@ -1,0 +1,43 @@
+{% load static %}
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}АгроСмена CRM{% endblock %} · АгроСмена</title>
+  <meta name="theme-color" content="#103c2f">
+  <link rel="icon" type="image/png" href="{% static 'web/crm-logo.png' %}?v=20260917-3">
+  <link rel="stylesheet" href="{% static 'web/style.css' %}?v=20260905-3">
+  <link rel="stylesheet" href="{% static 'web/theme.css' %}?v=20260919-2">
+  <script src="{% static 'web/app.js' %}?v=20260919-2" defer></script>
+</head>
+<body>
+<a class="skip-link" href="#main">К содержимому</a>
+<aside class="sidebar">
+  <a class="brand" href="{% url 'web:dashboard' %}"><img src="{% static 'web/brand-mark.svg' %}" alt="" width="38" height="38"><span>АгроСмена<small>CRM · Рабочее пространство</small></span></a>
+  <button class="menu-toggle" type="button" aria-controls="navigation" aria-expanded="true">Меню ☰</button>
+  {% with current_url=request.resolver_match.url_name %}
+  <nav id="navigation" aria-label="Основное меню">
+    <span class="nav-caption">РАБОЧЕЕ ПРОСТРАНСТВО</span>
+    <a href="{% url 'web:dashboard' %}" {% if section == 'dashboard' %}aria-current="page"{% endif %}><span aria-hidden="true">◫</span> Главная</a>
+    <a href="{% url 'web:customers' %}" {% if section == 'customers' %}aria-current="page"{% endif %}><span aria-hidden="true">◎</span> Клиенты</a>
+    <a href="{% url 'web:deals' %}" {% if section == 'deals' %}aria-current="page"{% endif %}><span aria-hidden="true">▤</span> Сделки</a>
+    <a href="{% url 'web:tasks' %}" {% if section == 'tasks' %}aria-current="page"{% endif %}><span aria-hidden="true">☑</span> Задачи</a>
+    <a href="{% url 'accounts:profile' %}" {% if current_url == 'profile' %}aria-current="page"{% endif %}><span aria-hidden="true">○</span> Мой профиль</a>
+    <a href="{% url 'download' %}"><span aria-hidden="true">↓</span> Скачать программу</a>
+    {% if user.is_superuser %}<a href="{% url 'installer-admin' %}" {% if section == 'installer-admin' %}aria-current="page"{% endif %}><span aria-hidden="true">⚙</span> Версии программы</a>{% endif %}
+    {% if can_manage_users %}<a href="{% url 'accounts:users' %}" {% if current_url == 'users' or current_url == 'user-add' or current_url == 'user-role' or current_url == 'user-remove' %}aria-current="page"{% endif %}><span aria-hidden="true">⚙</span> Пользователи</a>{% endif %}
+  </nav>
+  {% endwith %}
+  <div class="sidebar-foot"><div class="sidebar-account"><span class="user-avatar" aria-hidden="true">{{ user.username|first|upper }}</span><span class="sidebar-user">{{ user.username }}<small>{{ current_membership.get_role_display|default:'Мой аккаунт' }}</small></span></div>
+    {% if user.is_authenticated %}<form method="post" action="{% url 'accounts:logout' %}">{% csrf_token %}<button type="submit" class="button logout-button">Выйти</button></form>{% endif %}
+  </div>
+</aside>
+<main id="main" class="main">
+  <header class="page-header"><div><h1>{% block heading %}{% endblock %}</h1><p>{% block subtitle %}{% endblock %}</p></div>{% block actions %}{% endblock %}</header>
+  {% if messages %}<div aria-live="polite">{% for message in messages %}<div class="notice {{ message.tags }}">{{ message }}</div>{% endfor %}</div>{% endif %}
+  {% block content %}{% endblock %}
+  <footer class="workspace-footer"><span class="footer-organization">{{ current_membership.organization.name|default:'Рабочее пространство' }}</span><span class="local-badge">{{ current_membership.get_role_display|default:'Нет организации' }}</span><button class="workspace-motion" type="button" aria-pressed="false" hidden>Приостановить фон</button></footer>
+</main>
+</body>
+</html>

@@ -1,0 +1,7 @@
+{% extends 'web/base.html' %}
+{% block title %}{{ page_title }}{% endblock %}{% block heading %}{{ page_title }}{% endblock %}
+{% block subtitle %}{{ current_membership.organization.name }}{% endblock %}
+{% block content %}<section class="panel account-panel"><form method="post" novalidate>
+{% csrf_token %}{% include 'accounts/fields.html' %}
+<div class="form-actions"><button class="button primary" type="submit">Сохранить</button><a class="button" href="{% url 'accounts:users' %}">Отмена</a></div>
+</form></section>{% endblock %}

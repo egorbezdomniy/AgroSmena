@@ -1,0 +1,18 @@
+{% extends 'web/base.html' %}
+{% block title %}Управление установщиком{% endblock %}
+{% block heading %}Версии программы{% endblock %}
+{% block subtitle %}Публикация установщика · только для суперпользователей{% endblock %}
+{% block actions %}<a class="button" href="{% url 'download' %}">Страница скачивания ↗</a>{% endblock %}
+{% block content %}
+<section class="panel account-panel">
+  <h2>Доступно для скачивания</h2>
+  {% if release %}<p><strong>Версия {{ release.version }}</strong> · {{ release.size|filesizeformat }}</p><p>{{ release.notes|linebreaksbr }}</p>{% else %}<p>Установщик пока не опубликован.</p>{% endif %}
+  <h2>Опубликовать новую версию</h2>
+  <p>Загрузите готовую сборку. После публикации кнопка скачивания будет выдавать этот установщик.</p>
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {% include 'accounts/fields.html' %}
+    <button class="button primary" type="submit">Загрузить и опубликовать</button>
+  </form>
+</section>
+{% endblock %}

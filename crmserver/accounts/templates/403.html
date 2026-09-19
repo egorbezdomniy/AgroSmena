@@ -1,0 +1,3 @@
+{% extends 'web/base.html' %}
+{% block title %}Доступ запрещён{% endblock %}{% block heading %}Недостаточно прав{% endblock %}
+{% block content %}<section class="panel account-panel"><p>Эта страница недоступна вашей роли либо вы больше не состоите в организации.</p><a class="button" href="{% url 'accounts:profile' %}">Мой профиль</a></section>{% endblock %}

@@ -1,0 +1,9 @@
+{% extends 'web/base.html' %}
+{% block title %}Пользователи{% endblock %}{% block heading %}Пользователи организации{% endblock %}
+{% block subtitle %}Управление доступом к {{ current_membership.organization.name }}{% endblock %}
+{% block actions %}<a class="button primary" href="{% url 'accounts:user-add' %}">＋ Добавить пользователя</a>{% endblock %}
+{% block content %}<section class="panel"><div class="table-wrap"><table>
+<thead><tr><th>Пользователь</th><th>Email</th><th>Роль</th><th>Действия</th></tr></thead><tbody>
+{% for member in members %}<tr><td><b>{{ member.user.username }}</b><div>{{ member.user.get_full_name }}</div></td><td>{{ member.user.email|default:'—' }}</td><td>{{ member.get_role_display }}</td>
+<td class="row-actions"><a href="{% url 'accounts:user-role' member.pk %}">Изменить роль</a> <a href="{% url 'accounts:user-remove' member.pk %}">Удалить из организации</a></td></tr>{% endfor %}
+</tbody></table></div></section>{% endblock %}

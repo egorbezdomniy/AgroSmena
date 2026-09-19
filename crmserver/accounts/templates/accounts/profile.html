@@ -1,0 +1,10 @@
+{% extends 'web/base.html' %}
+{% block title %}Профиль{% endblock %}{% block heading %}Мой профиль{% endblock %}
+{% block subtitle %}{{ user.username }}{% endblock %}
+{% block content %}
+<section class="panel account-panel">
+{% if current_membership %}<p>Организация: <strong>{{ current_membership.organization.name }}</strong></p><p>Роль: {{ current_membership.get_role_display }}</p>
+{% else %}<div class="notice error">Вы не состоите в организации. Доступ к данным CRM закрыт. Обратитесь к администратору.</div>{% endif %}
+<form method="post" novalidate>{% csrf_token %}{% include 'accounts/fields.html' %}
+<button class="button primary" type="submit">Сохранить профиль</button></form>
+</section>{% endblock %}

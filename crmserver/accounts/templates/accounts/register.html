@@ -1,0 +1,9 @@
+{% extends 'accounts/auth_base.html' %}
+{% block title %}Регистрация{% endblock %}
+{% block auth_page_class %}register-page{% endblock %}
+{% block content %}
+<h1>Новое рабочее пространство</h1><p>Вы станете администратором новой организации. Для доступа к существующей организации обратитесь к её администратору.</p>
+<form method="post" novalidate>{% csrf_token %}<div class="auth-fields">{% include 'accounts/fields.html' %}</div>
+<button class="button primary" type="submit">Зарегистрироваться</button></form>
+<p>Уже есть аккаунт? <a href="{% url 'accounts:login' %}">Войти</a></p>
+{% endblock %}

@@ -1,0 +1,294 @@
+{% extends 'web/base.html' %}
+
+{% block title %}{% if section == 'customers' %}{{ record.name }}{% else %}{{ record.title }}{% endif %}{% endblock %}
+
+{% block heading %}
+  <span class="detail-page-label">
+    {% if section == 'customers' %}Клиент{% elif section == 'deals' %}Сделка{% else %}Задача{% endif %}
+  </span>
+  {% if section == 'customers' %}{{ record.name }}{% else %}{{ record.title }}{% endif %}
+{% endblock %}
+
+{% block subtitle %}
+  {% if section == 'customers' %}
+    Контактная информация, история работы и связанные записи
+  {% elif section == 'deals' %}
+    Основные параметры сделки и запланированные задачи
+  {% else %}
+    Сроки, приоритет и связи задачи
+  {% endif %}
+{% endblock %}
+
+{% block actions %}
+  <div class="detail-actions">
+    <a class="button detail-back" href="{{ list_url }}"><span aria-hidden="true">←</span> К списку</a>
+    <a class="button primary" href="{% url edit_name record.pk %}">Изменить</a>
+    <a class="button danger" href="{% url delete_name record.pk %}">Удалить</a>
+  </div>
+{% endblock %}
+
+{% block content %}
+<article class="panel detail-overview">
+  <div class="detail-overview__main">
+    <div class="detail-avatar detail-avatar--{{ section }}" aria-hidden="true">
+      {% if section == 'customers' %}
+        {{ record.name|slice:':1'|upper }}
+      {% elif section == 'deals' %}
+        <span>₽</span>
+      {% else %}
+        <span>✓</span>
+      {% endif %}
+    </div>
+    <div class="detail-overview__copy">
+      <span class="detail-eyebrow">
+        {% if section == 'customers' %}Профиль клиента{% elif section == 'deals' %}Коммерческая возможность{% else %}Рабочая задача{% endif %}
+      </span>
+      <h2>{% if section == 'customers' %}{{ record.name }}{% else %}{{ record.title }}{% endif %}</h2>
+      <p>
+        {% if section == 'customers' %}
+          {% if record.company_name %}{{ record.company_name }}{% if record.position %} · {{ record.position }}{% endif %}{% else %}Частный клиент{% endif %}
+        {% elif section == 'deals' %}
+          Сделка с клиентом <a href="{% url 'web:customer-detail' record.customer_id %}">{{ record.customer.name }}</a>
+        {% else %}
+          {% if record.customer %}Для клиента <a href="{% url 'web:customer-detail' record.customer_id %}">{{ record.customer.name }}</a>{% else %}Без привязки к клиенту{% endif %}
+        {% endif %}
+      </p>
+    </div>
+  </div>
+
+  <div class="detail-highlights" aria-label="Краткий обзор">
+    {% if section == 'customers' %}
+      <div class="detail-highlight">
+        <span>Сделки</span>
+        <strong>{{ record.deals.count }}</strong>
+      </div>
+      <div class="detail-highlight">
+        <span>Задачи</span>
+        <strong>{{ record.tasks.count }}</strong>
+      </div>
+      <div class="detail-highlight detail-highlight--text">
+        <span>Основной контакт</span>
+        <strong>{% if record.email %}{{ record.email }}{% elif record.phone %}{{ record.phone }}{% else %}Не указан{% endif %}</strong>
+      </div>
+    {% elif section == 'deals' %}
+      <div class="detail-highlight detail-highlight--amount">
+        <span>Сумма сделки</span>
+        <strong>{{ record.amount|floatformat:'2g' }} <small>₽</small></strong>
+      </div>
+      <div class="detail-highlight">
+        <span>Стадия</span>
+        <strong><span class="status-pill {% if record.stage == 'Успешно' %}status-pill--success{% elif record.stage == 'Проиграна' %}status-pill--danger{% else %}status-pill--active{% endif %}">{{ record.stage }}</span></strong>
+      </div>
+      <div class="detail-highlight">
+        <span>Закрытие</span>
+        <strong>{{ record.expected_close_date|date:'d.m.Y'|default:'Не указано' }}</strong>
+      </div>
+    {% else %}
+      <div class="detail-highlight">
+        <span>Статус</span>
+        <strong><span class="status-pill {% if record.status == 'Выполнена' %}status-pill--success{% elif record.status == 'Отменена' %}status-pill--muted{% elif record.status == 'В работе' %}status-pill--active{% endif %}">{{ record.status }}</span></strong>
+      </div>
+      <div class="detail-highlight">
+        <span>Приоритет</span>
+        <strong><span class="status-pill {% if record.priority == 'Высокий' %}status-pill--danger{% elif record.priority == 'Низкий' %}status-pill--success{% endif %}">{{ record.priority }}</span></strong>
+      </div>
+      <div class="detail-highlight">
+        <span>Срок</span>
+        <strong>{{ record.due_date|date:'d.m.Y'|default:'Не указан' }}</strong>
+      </div>
+    {% endif %}
+  </div>
+</article>
+
+<div class="detail-layout">
+  <div class="detail-layout__main">
+    <section class="panel detail-section">
+      <div class="detail-section__header">
+        <div>
+          <span class="detail-section__kicker">Данные записи</span>
+          <h2>{% if section == 'customers' %}Контактная информация{% elif section == 'deals' %}Параметры сделки{% else %}Параметры задачи{% endif %}</h2>
+        </div>
+      </div>
+
+      <dl class="detail-fields">
+        {% if section == 'customers' %}
+          <div class="detail-field">
+            <dt>Имя</dt>
+            <dd>{{ record.name }}</dd>
+          </div>
+          <div class="detail-field">
+            <dt>Компания</dt>
+            <dd class="{% if not record.company_name %}detail-value--empty{% endif %}">{{ record.company_name|default:'Не указана' }}</dd>
+          </div>
+          <div class="detail-field">
+            <dt>Должность</dt>
+            <dd class="{% if not record.position %}detail-value--empty{% endif %}">{{ record.position|default:'Не указана' }}</dd>
+          </div>
+          <div class="detail-field">
+            <dt>Телефон</dt>
+            <dd class="{% if not record.phone %}detail-value--empty{% endif %}">{% if record.phone %}<a href="tel:{{ record.phone }}">{{ record.phone }}</a>{% else %}Не указан{% endif %}</dd>
+          </div>
+          <div class="detail-field">
+            <dt>Email</dt>
+            <dd class="{% if not record.email %}detail-value--empty{% endif %}">{% if record.email %}<a href="mailto:{{ record.email }}">{{ record.email }}</a>{% else %}Не указан{% endif %}</dd>
+          </div>
+          <div class="detail-field">
+            <dt>Telegram</dt>
+            <dd class="{% if not record.telegram %}detail-value--empty{% endif %}">{{ record.telegram|default:'Не указан' }}</dd>
+          </div>
+        {% elif section == 'deals' %}
+          <div class="detail-field">
+            <dt>Клиент</dt>
+            <dd><a href="{% url 'web:customer-detail' record.customer_id %}">{{ record.customer.name }}</a></dd>
+          </div>
+          <div class="detail-field">
+            <dt>Сумма</dt>
+            <dd class="detail-value--money">{{ record.amount|floatformat:'2g' }} ₽</dd>
+          </div>
+          <div class="detail-field">
+            <dt>Стадия</dt>
+            <dd><span class="status-pill {% if record.stage == 'Успешно' %}status-pill--success{% elif record.stage == 'Проиграна' %}status-pill--danger{% else %}status-pill--active{% endif %}">{{ record.stage }}</span></dd>
+          </div>
+          <div class="detail-field">
+            <dt>Планируемое закрытие</dt>
+            <dd class="{% if not record.expected_close_date %}detail-value--empty{% endif %}">{{ record.expected_close_date|date:'d.m.Y'|default:'Не указано' }}</dd>
+          </div>
+        {% else %}
+          <div class="detail-field">
+            <dt>Статус</dt>
+            <dd><span class="status-pill {% if record.status == 'Выполнена' %}status-pill--success{% elif record.status == 'Отменена' %}status-pill--muted{% elif record.status == 'В работе' %}status-pill--active{% endif %}">{{ record.status }}</span></dd>
+          </div>
+          <div class="detail-field">
+            <dt>Приоритет</dt>
+            <dd><span class="status-pill {% if record.priority == 'Высокий' %}status-pill--danger{% elif record.priority == 'Низкий' %}status-pill--success{% endif %}">{{ record.priority }}</span></dd>
+          </div>
+          <div class="detail-field">
+            <dt>Срок</dt>
+            <dd class="{% if not record.due_date %}detail-value--empty{% endif %}">{{ record.due_date|date:'d.m.Y'|default:'Не указан' }}</dd>
+          </div>
+          <div class="detail-field">
+            <dt>Клиент</dt>
+            <dd class="{% if not record.customer %}detail-value--empty{% endif %}">{% if record.customer %}<a href="{% url 'web:customer-detail' record.customer_id %}">{{ record.customer.name }}</a>{% else %}Не привязан{% endif %}</dd>
+          </div>
+          <div class="detail-field detail-field--wide">
+            <dt>Сделка</dt>
+            <dd class="{% if not record.deal %}detail-value--empty{% endif %}">{% if record.deal %}<a href="{% url 'web:deal-detail' record.deal_id %}">{{ record.deal.title }}</a>{% else %}Не привязана{% endif %}</dd>
+          </div>
+        {% endif %}
+      </dl>
+    </section>
+
+    <section class="panel detail-section detail-description">
+      <div class="detail-section__header">
+        <div>
+          <span class="detail-section__kicker">Контекст</span>
+          <h2>{% if section == 'customers' %}Заметки о клиенте{% else %}Описание{% endif %}</h2>
+        </div>
+      </div>
+      <div class="detail-description__body {% if section == 'customers' and not record.notes or section != 'customers' and not record.description %}detail-description__body--empty{% endif %}">
+        {% if section == 'customers' %}
+          {{ record.notes|default:'Заметок пока нет.'|linebreaksbr }}
+        {% else %}
+          {{ record.description|default:'Описание пока не добавлено.'|linebreaksbr }}
+        {% endif %}
+      </div>
+    </section>
+  </div>
+
+  <aside class="panel detail-section detail-metadata">
+    <div class="detail-section__header">
+      <div>
+        <span class="detail-section__kicker">Система</span>
+        <h2>Информация о записи</h2>
+      </div>
+    </div>
+    <dl class="detail-meta-list">
+      <div>
+        <dt>Создано</dt>
+        <dd>{{ record.created_at|date:'d.m.Y' }} <small>{{ record.created_at|date:'H:i' }}</small></dd>
+      </div>
+      <div>
+        <dt>Последнее изменение</dt>
+        <dd>{{ record.updated_at|date:'d.m.Y' }} <small>{{ record.updated_at|date:'H:i' }}</small></dd>
+      </div>
+      <div>
+        <dt>UUID</dt>
+        <dd class="detail-uuid">{{ record.uuid }}</dd>
+      </div>
+    </dl>
+  </aside>
+</div>
+
+{% if section == 'customers' %}
+<div class="related-grid detail-related-grid">
+  <section class="panel detail-related">
+    <div class="detail-related__header">
+      <div>
+        <span class="detail-section__kicker">Продажи</span>
+        <h2>Сделки <span class="count">{{ record.deals.count }}</span></h2>
+      </div>
+      <a href="{% url 'web:deal-create' %}">Добавить <span aria-hidden="true">＋</span></a>
+    </div>
+    <div class="detail-related__list">
+      {% for item in record.deals.all %}
+        <a class="detail-related__row" href="{% url 'web:deal-detail' item.pk %}">
+          <span class="detail-related__content">
+            <strong>{{ item.title }}</strong>
+            <small><span class="status-dot-inline {% if item.stage == 'Успешно' %}status-dot-inline--success{% elif item.stage == 'Проиграна' %}status-dot-inline--danger{% endif %}"></span>{{ item.stage }}</small>
+          </span>
+          <span class="detail-related__end"><strong>{{ item.amount|floatformat:'2g' }} ₽</strong><span aria-hidden="true">›</span></span>
+        </a>
+      {% empty %}
+        <div class="detail-related__empty"><span aria-hidden="true">◇</span><p>Связанных сделок пока нет</p></div>
+      {% endfor %}
+    </div>
+  </section>
+
+  <section class="panel detail-related">
+    <div class="detail-related__header">
+      <div>
+        <span class="detail-section__kicker">Планирование</span>
+        <h2>Задачи <span class="count">{{ record.tasks.count }}</span></h2>
+      </div>
+      <a href="{% url 'web:task-create' %}">Добавить <span aria-hidden="true">＋</span></a>
+    </div>
+    <div class="detail-related__list">
+      {% for item in record.tasks.all %}
+        <a class="detail-related__row" href="{% url 'web:task-detail' item.pk %}">
+          <span class="detail-related__content">
+            <strong>{{ item.title }}</strong>
+            <small><span class="status-dot-inline {% if item.status == 'Выполнена' %}status-dot-inline--success{% elif item.status == 'Отменена' %}status-dot-inline--muted{% endif %}"></span>{{ item.status }}</small>
+          </span>
+          <span class="detail-related__end"><time>{{ item.due_date|date:'d.m.Y'|default:'Без срока' }}</time><span aria-hidden="true">›</span></span>
+        </a>
+      {% empty %}
+        <div class="detail-related__empty"><span aria-hidden="true">✓</span><p>Связанных задач пока нет</p></div>
+      {% endfor %}
+    </div>
+  </section>
+</div>
+{% elif section == 'deals' %}
+<section class="panel detail-related detail-related--single">
+  <div class="detail-related__header">
+    <div>
+      <span class="detail-section__kicker">Планирование</span>
+      <h2>Задачи сделки <span class="count">{{ record.tasks.count }}</span></h2>
+    </div>
+    <a href="{% url 'web:task-create' %}">Добавить задачу <span aria-hidden="true">＋</span></a>
+  </div>
+  <div class="detail-related__list">
+    {% for item in record.tasks.all %}
+      <a class="detail-related__row" href="{% url 'web:task-detail' item.pk %}">
+        <span class="detail-related__content">
+          <strong>{{ item.title }}</strong>
+          <small><span class="status-dot-inline {% if item.status == 'Выполнена' %}status-dot-inline--success{% elif item.status == 'Отменена' %}status-dot-inline--muted{% endif %}"></span>{{ item.status }} · {{ item.priority }} приоритет</small>
+        </span>
+        <span class="detail-related__end"><time>{{ item.due_date|date:'d.m.Y'|default:'Без срока' }}</time><span aria-hidden="true">›</span></span>
+      </a>
+    {% empty %}
+      <div class="detail-related__empty"><span aria-hidden="true">✓</span><p>Для этой сделки пока нет задач</p></div>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+{% endblock %}

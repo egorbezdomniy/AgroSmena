@@ -1,0 +1,15 @@
+{% extends 'accounts/auth_base.html' %}
+{% block title %}Скачать программу{% endblock %}
+{% block content %}
+<h1>АгроСмена для Windows</h1>
+<p>Работайте с клиентами, сделками и задачами — даже без интернета.</p>
+{% if release %}
+<p><strong>Версия {{ release.version }}</strong> · {{ release.size|filesizeformat }}</p>
+<a class="button primary" href="{% url 'installer-download' %}">Скачать установщик .exe</a>
+{% if release.notes %}<h2 style="margin-top: 28px">Что нового</h2><p>{{ release.notes|linebreaksbr }}</p>{% endif %}
+<details style="margin-top: 24px"><summary>Контрольная сумма SHA-256</summary><p style="overflow-wrap: anywhere; font-family: monospace">{{ release.sha256 }}</p></details>
+{% else %}
+<p>Установщик пока не опубликован. Загляните сюда позже.</p>
+{% endif %}
+<p><a href="{% url 'web:landing' %}">На главную</a> · <a href="{% url 'accounts:login' %}">Войти в аккаунт</a></p>
+{% endblock %}

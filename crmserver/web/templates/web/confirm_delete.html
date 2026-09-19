@@ -1,0 +1,9 @@
+{% extends 'web/base.html' %}
+{% block title %}Подтверждение удаления{% endblock %}
+{% block heading %}Удалить запись?{% endblock %}
+{% block subtitle %}Перед удалением проверьте выбранную запись{% endblock %}
+{% block content %}
+<section class="panel delete-panel"><span class="delete-symbol" aria-hidden="true">!</span><h2>{{ object }}</h2>
+{% if section == 'customers' %}<p>Удаление клиента также удалит все сделки, связанные с ним: <strong>{{ deal_count }}</strong>. Задачи сохранятся без ссылок на удалённого клиента и сделки.</p>{% elif section == 'deals' %}<p>Связанные задачи сохранятся без ссылки на эту сделку.</p>{% endif %}
+<p>Это действие нельзя отменить.</p><form method="post">{% csrf_token %}<div class="form-actions"><button class="button danger" type="submit">Да, удалить</button><a class="button" href="{{ list_url }}">Отмена</a></div></form></section>
+{% endblock %}

@@ -1,0 +1,34 @@
+{% extends 'web/base.html' %}
+{% block title %}Главная{% endblock %}
+{% block heading %}Всё под контролем{% endblock %}
+{% block subtitle %}Обзор вашей работы на {{ today|date:'j E Y' }}{% endblock %}
+{% block actions %}<a class="button primary" href="{% url 'web:task-create' %}">＋ Новая задача</a>{% endblock %}
+{% block content %}
+<section class="metrics" aria-label="Статистика">
+  <a class="metric" href="{% url 'web:customers' %}"><span>Клиенты</span><strong>{{ customer_count }}</strong><small>В клиентской базе ↗</small></a>
+  <a class="metric" href="{% url 'web:deals' %}"><span>Активные сделки</span><strong>{{ active_deals }}</strong><small>В работе, без закрытых ↗</small></a>
+  <div class="metric accent"><span>Сумма активных сделок</span><strong class="money">{{ active_amount|floatformat:'2g' }} <em>₽</em></strong><small>Потенциальная выручка</small></div>
+  <div class="metric"><span>Задачи на сегодня</span><strong>{{ tasks_today }}</strong><small>Всего незавершённых: {{ pending_tasks }}</small></div>
+  <div class="metric warning"><span>Просроченные задачи</span><strong>{{ overdue_tasks }}</strong><small>Требуют внимания</small></div>
+</section>
+<div class="dashboard-grid">
+  <section class="panel deals-panel"><div class="panel-heading"><h2>Последние сделки</h2><a href="{% url 'web:deals' %}">Все сделки →</a></div>
+    {% for item in recent_deals %}
+    <div class="summary-row deal-summary-row">
+      <a class="deal-summary-link" href="{% url 'web:deal-detail' item.pk %}"><b>{{ item.title }}</b><small>{{ item.customer.name }}</small></a>
+      <details class="deal-stage-picker" name="deal-stage" data-stage-picker>
+        <summary class="deal-stage-button" title="Изменить стадию сделки" aria-label="Изменить стадию сделки «{{ item.title }}»: {{ item.stage }}">{{ item.stage }}<span aria-hidden="true">⌄</span></summary>
+        <form class="deal-stage-menu" method="post" action="{% url 'web:deal-stage' item.pk %}" aria-label="Стадия сделки «{{ item.title }}»">
+          {% csrf_token %}
+          {% for value, label in deal_stages %}<button type="submit" name="stage" value="{{ value }}" {% if value == item.stage %}disabled aria-current="true"{% endif %}><span class="stage-check" aria-hidden="true">{% if value == item.stage %}✓{% endif %}</span>{{ label }}</button>{% endfor %}
+        </form>
+      </details>
+      <b class="deal-summary-amount">{{ item.amount|floatformat:'2g' }} ₽</b>
+    </div>
+    {% empty %}<div class="empty"><h3>Пока нет сделок</h3><p>Добавьте клиента и создайте первую сделку.</p><a class="button" href="{% url 'web:deal-create' %}">Создать сделку</a></div>{% endfor %}
+  </section>
+  <section class="panel"><div class="panel-heading"><h2>Ближайшие задачи</h2><a href="{% url 'web:tasks' %}">Все задачи →</a></div>
+    {% for item in upcoming_tasks %}<a class="summary-row" href="{% url 'web:task-detail' item.pk %}"><span><b>{{ item.title }}</b><small>{{ item.customer.name|default:'Без клиента' }}</small></span><span class="row-end"><b {% if item.due_date < today %}class="overdue"{% endif %}>{{ item.due_date|date:'d.m.Y' }}</b><small>{{ item.priority }} приоритет</small></span></a>{% empty %}<div class="empty"><h3>Всё спокойно</h3><p>Нет незавершённых задач с указанным сроком.</p><a class="button" href="{% url 'web:task-create' %}">Создать задачу</a></div>{% endfor %}
+  </section>
+</div>
+{% endblock %}

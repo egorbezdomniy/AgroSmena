@@ -1,0 +1,9 @@
+<form class="quick-choice" method="post" action="{{ action }}" data-quick-choice>
+  {% csrf_token %}
+  <input type="hidden" name="source" value="{{ section }}">
+  <input type="hidden" name="filters" value="{{ request.GET.urlencode }}">
+  <select name="{{ field_name }}" aria-label="{{ label }}: {{ item.title }}">
+    {% for value, title in choices %}<option value="{{ value }}" {% if value == selected %}selected{% endif %}>{{ title }}</option>{% endfor %}
+  </select>
+  <button class="button" type="submit">Сохранить</button>
+</form>
