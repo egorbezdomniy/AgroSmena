@@ -1,0 +1,7 @@
+PySide6~=6.11.2
+SQLAlchemy~=2.0.52
+alembic~=1.19.2
+Django~=6.0.7
+djangorestframework~=3.17.1
+psycopg~=3.3.5
+python-dotenv~=1.2.3
