@@ -1,0 +1,2 @@
+"""AgroSmena CRM desktop application."""
+

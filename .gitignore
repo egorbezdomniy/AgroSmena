@@ -1,0 +1,10 @@
+__pycache__/
+*.py[cod]
+.venv/
+.idea/
+data/*.db
+data/*.db-*
+build/
+dist/
+crmserver/releases/installers/
+.build-tools/

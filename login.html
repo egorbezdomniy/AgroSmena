@@ -1,0 +1,458 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#103c2f">
+  <meta name="description" content="Войдите в АгроСмена CRM — рабочее пространство вашей команды.">
+  <title>Вход · АгроСмена CRM</title>
+  <link rel="icon" type="image/png" href="assets/crm-logo.png">
+  <style>
+    :root {
+      color-scheme: light;
+      --green: #103c2f;
+      --green-hover: #1c5541;
+      --ink: #193b30;
+      --muted: #76837d;
+      --error: #a23931;
+      font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, Arial, sans-serif;
+      font-synthesis: none;
+      text-rendering: optimizeLegibility;
+      -webkit-font-smoothing: antialiased;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    body { margin: 0; color: var(--ink); background: #fff; }
+    button, input { font: inherit; }
+    button, a, input { -webkit-tap-highlight-color: transparent; }
+    button, a { touch-action: manipulation; }
+    button { cursor: pointer; }
+    a { color: inherit; }
+    button:focus-visible, a:focus-visible { outline: 3px solid #6c9e7e; outline-offset: 5px; }
+    button:disabled { cursor: wait; }
+    svg { flex-shrink: 0; }
+    [hidden] { display: none !important; }
+    .icon { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+    .svg-library { position: absolute; width: 0; height: 0; overflow: hidden; }
+    .page { max-width: 1800px; min-height: 100vh; min-height: 100svh; margin: 0 auto; display: flex; flex-direction: column; }
+    .header { min-height: 100px; padding: 24px 54px; display: flex; align-items: center; justify-content: space-between; gap: 24px; }
+    .brand { display: inline-flex; align-items: center; gap: 12px; text-decoration: none; width: fit-content; }
+    .brand-mark { width: 38px; height: 38px; color: var(--green); }
+    .brand-name { font-size: 24px; font-weight: 650; letter-spacing: -1px; }
+    .brand-badge { align-self: center; border: 1px solid #dce5df; border-radius: 5px; padding: 3px 6px 4px; color: #597165; font-size: 10px; font-weight: 600; letter-spacing: 1.2px; margin: 3px 0 0 1px; }
+    .header-note { margin: 0; display: flex; align-items: center; gap: 12px; color: #7b8981; font-size: 13px; }
+    .header-note::before { content: ""; width: 26px; height: 1px; background: #b6c4ba; }
+    .scene {
+      position: relative; isolation: isolate; overflow: hidden; flex: 1;
+      display: grid; grid-template-columns: minmax(0, 1fr) 440px; align-items: center; gap: 64px;
+      min-height: 690px; margin: 0 24px; padding: 62px clamp(42px, 6.2vw, 106px);
+      border-radius: 28px; background: #103c2f;
+    }
+    .scene::before {
+      content: ""; position: absolute; z-index: -2; inset: 0;
+      background: radial-gradient(ellipse at 91% 7%, #4c786040 0%, transparent 51%), radial-gradient(ellipse at 54% 109%, #779a6b55 0%, transparent 51%), linear-gradient(115deg, #0c3329 5%, #164936 75%, #204e39);
+    }
+    .scene::after {
+      content: ""; pointer-events: none; position: absolute; inset: 0; z-index: -1;
+      background: linear-gradient(90deg, #0b302963, transparent 54%);
+      box-shadow: inset 0 0 0 1px #ffffff0a; border-radius: inherit;
+    }
+    .landscape { position: absolute; inset: 0; z-index: -1; width: 100%; height: 100%; pointer-events: none; }
+    .intro { align-self: stretch; display: flex; flex-direction: column; justify-content: center; align-items: flex-start; color: #fff; padding: 24px 0; }
+    .eyebrow { display: inline-flex; align-items: center; gap: 11px; margin: 0 0 32px; font-size: 11px; font-weight: 500; letter-spacing: 2.4px; line-height: 1.6; color: #bed1c2; }
+    .eyebrow::before { content: ""; display: block; height: 1px; width: 28px; background: #a9c5b0; }
+    .intro-title { font-size: clamp(54px, 5.5vw, 86px); font-weight: 400; line-height: 1.09; letter-spacing: -3.6px; margin: 0; }
+    .intro-title > span { display: block; }
+    .intro-title em { font-family: Georgia, "Times New Roman", serif; font-weight: 400; color: #c4dcb8; letter-spacing: -3px; }
+    .intro-description { margin: 29px 0 0; font-size: 16px; line-height: 1.8; color: #c1d0c4; }
+    .workspace-parts { display: flex; align-items: center; flex-wrap: wrap; gap: 19px; margin-top: 65px; color: #d0dbd1; }
+    .workspace-part { display: flex; align-items: center; gap: 8px; font-size: 12px; }
+    .workspace-part .icon { width: 17px; height: 17px; color: #a7c3aa; }
+    .part-divider { width: 1px; height: 14px; background: #d0e4d12b; }
+    .login-card {
+      width: 100%; position: relative; padding: 38px 38px 29px; background: #fff;
+      border: 1px solid #fff; border-radius: 24px;
+      box-shadow: 0 32px 90px #031d2940, 0 0 0 7px #ffffff06, 0 1px 0 #ffffff33;
+      animation: card-enter 750ms cubic-bezier(.2, .7, .2, 1) both;
+    }
+    .card-top { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 28px; }
+    .card-emblem { width: 46px; height: 46px; flex-shrink: 0; display: grid; place-items: center; border: 1px solid #e4ebe3; border-radius: 14px; background: #f5f8f3; }
+    .card-emblem svg { width: 26px; height: 26px; color: #42684d; }
+    .card-overline { color: #7a8980; font-size: 10px; letter-spacing: 1.7px; font-weight: 600; line-height: 1.6; }
+    h1 { margin: 0; color: #183b2f; font-size: 29px; font-weight: 600; line-height: 1.25; letter-spacing: -1px; }
+    .card-description { color: var(--muted); font-size: 14px; line-height: 1.65; margin: 10px 0 27px; max-width: 290px; }
+    .field + .field { margin-top: 20px; }
+    .field label { display: block; font-weight: 500; font-size: 13px; margin-bottom: 9px; color: #344d40; }
+    .input-wrap { position: relative; }
+    .input-icon { position: absolute; left: 16px; top: 18px; width: 18px; height: 18px; color: #94a498; pointer-events: none; transition: color 180ms; }
+    .field input {
+      width: 100%; height: 54px; padding: 0 16px 1px 46px; outline: none;
+      border: 1px solid #dfe6e0; border-radius: 10px; background: #fcfdfb; color: #213e2f; font-size: 15px;
+      transition: border-color 180ms, box-shadow 180ms, background 180ms;
+    }
+    .field input.password-input { padding-right: 52px; }
+    .field input::placeholder { color: #929d95; opacity: 1; }
+    .field input:hover { border-color: #b7c7bb; }
+    .field input:focus { border-color: #62826b; box-shadow: 0 0 0 3px #527b5e13; background: #fff; }
+    .input-wrap:focus-within .input-icon { color: #406d4e; }
+    .field input[aria-invalid="true"] { border-color: #c8786d; }
+    .password-toggle { position: absolute; right: 5px; top: 5px; width: 44px; height: 44px; display: grid; place-items: center; border: 0; border-radius: 7px; background: transparent; color: #899b8e; transition: color 180ms, background 180ms; }
+    .password-toggle:hover { color: var(--green); background: #eff4ed; }
+    .password-toggle[aria-pressed="true"] .eye-slash { display: block; }
+    .eye-slash { display: none; }
+    .caps-lock { margin: 8px 0 0; font-size: 12px; color: #886831; }
+    .error-box { background: #fcf2ee; border: 1px solid #edd3c9; border-radius: 9px; padding: 12px 14px; margin-bottom: 20px; color: var(--error); font-size: 13px; line-height: 1.55; }
+    .error-box ul, .field-errors ul { list-style: none; margin: 0; padding: 0; }
+    .field-errors { font-size: 12px; color: var(--error); line-height: 1.5; margin-top: 7px; }
+    .submit-button { display: flex; justify-content: center; align-items: center; gap: 12px; width: 100%; min-height: 54px; padding: 13px 20px; margin-top: 25px; border: 1px solid #103c2f; border-radius: 10px; color: #fff; background: var(--green); font-size: 14px; font-weight: 500; box-shadow: 0 4px 9px #173d2912; transition: background 180ms, transform 180ms, box-shadow 180ms; }
+    .submit-button:hover { background: var(--green-hover); box-shadow: 0 5px 14px #173d2926; transform: translateY(-1px); }
+    .submit-button:active { transform: translateY(0); }
+    .submit-button .icon { width: 17px; height: 17px; transition: transform 180ms; }
+    .submit-button:hover .icon { transform: translateX(3px); }
+    .submit-button:disabled { opacity: .8; transform: none; }
+    .spinner { width: 15px; height: 15px; border: 1.5px solid #ffffff4d; border-top-color: #fff; border-radius: 50%; animation: spin 800ms linear infinite; }
+    .register-area { border-top: 1px solid #e8ece6; margin-top: 27px; padding-top: 23px; text-align: center; }
+    .register-area p { margin: 0 0 8px; color: #8b958c; font-size: 12px; line-height: 1.5; }
+    .register-link { display: inline-flex; align-items: center; gap: 7px; min-height: 26px; color: #315e40; font-size: 13px; font-weight: 600; text-decoration: none; text-underline-offset: 4px; }
+    .register-link:hover { text-decoration: underline; }
+    .register-link .icon { width: 14px; height: 14px; }
+    .card-footnote { margin: 22px 0 0; display: flex; align-items: center; justify-content: center; gap: 6px; color: #8b968b; font-size: 10px; }
+    .card-footnote .icon { width: 12px; height: 12px; }
+    .scene-signature { position: absolute; bottom: 24px; left: clamp(42px, 6.2vw, 106px); color: #b3c8b8; font-size: 9px; letter-spacing: 2px; opacity: .65; }
+    .motion-toggle { position: absolute; bottom: 20px; right: 23px; display: grid; place-items: center; width: 34px; height: 34px; border: 1px solid #c4d8c32e; border-radius: 50%; background: #0a302833; color: #b9cfb8; transition: background 180ms; }
+    .motion-toggle:hover { background: #ffffff14; }
+    .motion-toggle .icon { width: 13px; height: 13px; }
+    .footer { display: flex; justify-content: space-between; align-items: center; gap: 20px; padding: 25px 54px 26px; color: #8a958c; font-size: 11px; line-height: 1.5; }
+    .footer p { margin: 0; }
+    .footer-right { display: flex; align-items: center; gap: 8px; }
+    .footer-right .icon { width: 14px; height: 14px; }
+    @keyframes card-enter { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @media (min-width: 1550px) {
+      .scene { grid-template-columns: minmax(0, 1fr) 470px; gap: 100px; padding-right: 110px; }
+      .login-card { padding: 43px 42px 33px; }
+      .intro-description { font-size: 18px; }
+    }
+    @media (max-width: 1120px) {
+      .header { padding-right: 42px; padding-left: 42px; }
+      .scene { grid-template-columns: minmax(0, 1fr) 402px; gap: 35px; padding: 48px 40px 58px; }
+      .intro-title { font-size: 61px; letter-spacing: -3px; }
+      .intro-description { font-size: 15px; }
+      .login-card { padding: 32px 30px 26px; }
+      .workspace-parts { gap: 12px; }
+      .scene-signature { left: 40px; }
+    }
+    @media (max-width: 900px) {
+      .header { min-height: 86px; padding: 22px 32px; }
+      .header-note { font-size: 11px; }
+      .scene { grid-template-columns: minmax(0, 1fr) 370px; gap: 28px; padding: 38px 30px 56px; margin: 0 16px; min-height: 656px; }
+      .intro-title { font-size: 51px; letter-spacing: -2.8px; }
+      .eyebrow { font-size: 9px; letter-spacing: 1.8px; gap: 8px; }
+      .eyebrow::before { width: 17px; }
+      .workspace-parts { gap: 13px; flex-direction: column; align-items: flex-start; margin-top: 44px; }
+      .part-divider { display: none; }
+      .login-card { padding: 30px 27px 26px; }
+      h1 { font-size: 27px; }
+      .footer { padding-right: 32px; padding-left: 32px; }
+      .scene-signature { left: 30px; }
+    }
+    @media (max-width: 760px) {
+      .header { min-height: 80px; padding: 20px 27px; }
+      .brand-name { font-size: 22px; }
+      .brand-mark { width: 32px; height: 32px; }
+      .header-note { display: none; }
+      .scene { display: flex; flex-direction: column; gap: 28px; padding: 35px 24px 62px; border-radius: 22px; min-height: auto; }
+      .intro { align-self: auto; align-items: center; padding: 0; text-align: center; }
+      .eyebrow { margin: 0 0 15px; font-size: 9px; letter-spacing: 2px; }
+      .eyebrow::before { display: none; }
+      .intro-title { font-size: 37px; line-height: 1.2; letter-spacing: -1.8px; }
+      .intro-title > span { display: inline; }
+      .intro-title > span:first-child { display: none; }
+      .intro-title em { letter-spacing: -1.8px; }
+      .intro-description, .workspace-parts { display: none; }
+      .login-card { max-width: 440px; padding: 30px 32px 26px; border-radius: 20px; }
+      .card-top, .card-footnote { display: none; }
+      h1 { font-size: 29px; }
+      .card-description { margin-bottom: 25px; }
+      .scene-signature { font-size: 8px; left: 24px; bottom: 26px; }
+      .motion-toggle { right: 20px; bottom: 17px; }
+      .footer { padding: 21px 27px; font-size: 10px; }
+    }
+    @media (max-width: 420px) {
+      .header { min-height: 74px; padding: 18px 24px; }
+      .brand-name { font-size: 21px; }
+      .scene { margin: 0 10px; padding: 30px 16px 58px; gap: 26px; }
+      .intro-title { font-size: 34px; }
+      .login-card { padding: 27px 23px 24px; }
+      h1 { font-size: 26px; }
+      .card-overline { font-size: 9px; }
+      .field input { font-size: 16px; }
+      .footer { flex-wrap: wrap; justify-content: center; gap: 7px 24px; text-align: center; padding: 18px 20px; }
+    }
+    @media (min-width: 761px) and (max-height: 800px) {
+      .header { min-height: 80px; padding-top: 18px; padding-bottom: 18px; }
+      .scene { min-height: 0; padding-top: 26px; padding-bottom: 32px; }
+      .login-card { padding: 26px 34px 23px; }
+      .card-top, .card-footnote { display: none; }
+      .card-description { margin-bottom: 20px; }
+      .register-area { padding-top: 17px; }
+      .intro { padding: 12px 0; }
+      .intro-title { font-size: clamp(48px, 5vw, 70px); }
+      .eyebrow { margin-bottom: 24px; }
+      .workspace-parts { margin-top: 35px; }
+      .scene-signature { bottom: 17px; }
+      .motion-toggle { bottom: 13px; }
+      .footer { padding-top: 16px; padding-bottom: 16px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation: none !important; transition: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <svg class="svg-library" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <defs>
+      <symbol id="brand-symbol" viewBox="0 0 40 40">
+        <path d="M3 3h11a6 6 0 0 1 6 6v11H9a6 6 0 0 1-6-6Z" fill="currentColor"/>
+        <path d="M26 3h11v11a6 6 0 0 1-6 6H20V9a6 6 0 0 1 6-6Z" fill="currentColor" opacity=".64"/>
+        <path d="M9 20h11v11a6 6 0 0 1-6 6H3V26a6 6 0 0 1 6-6Z" fill="currentColor" opacity=".64"/>
+        <path d="M20 20h11a6 6 0 0 1 6 6v11H26a6 6 0 0 1-6-6Z" fill="currentColor"/>
+      </symbol>
+      <symbol id="icon-arrow" viewBox="0 0 24 24"><path d="M5 12h14m-5-5 5 5-5 5"/></symbol>
+      <symbol id="icon-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.5"/><path d="M5 20v-1a7 7 0 0 1 14 0v1"/></symbol>
+      <symbol id="icon-lock" viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="11" rx="3"/><path d="M8 10V7a4 4 0 0 1 8 0v3m-4 5v2"/></symbol>
+      <symbol id="icon-team" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M3 20v-2a6 6 0 0 1 12 0v2m0-15a3 3 0 0 1 0 6m3 3a5 5 0 0 1 3 4v2"/></symbol>
+      <symbol id="icon-deal" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="14" rx="3"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M3 12a24 24 0 0 0 18 0m-9 0v3"/></symbol>
+      <symbol id="icon-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></symbol>
+      <symbol id="icon-sprout" viewBox="0 0 24 24"><path d="M12 21V11m0 5C5 16 3 12 3 7c6 0 9 3 9 9Zm0-4c0-6 3-9 9-9 0 6-3 9-9 9Z"/></symbol>
+    </defs>
+  </svg>
+  <div class="page">
+    <header class="header">
+      <a class="brand" href="#" aria-label="АгроСмена CRM — страница входа">
+        <svg class="brand-mark" aria-hidden="true"><use href="#brand-symbol"/></svg>
+        <span class="brand-name">АгроСмена</span><span class="brand-badge">CRM</span>
+      </a>
+      <p class="header-note">Больше возможностей. Вместе.</p>
+    </header>
+    <main class="scene" id="scene">
+      <canvas class="landscape" id="landscape" aria-hidden="true"></canvas>
+      <section class="intro" aria-label="АгроСмена — рабочее пространство вашей команды">
+        <p class="eyebrow">ПОЧВА ДЛЯ ВАШЕГО РОСТА</p>
+        <h2 class="intro-title"><span>Всё растёт.</span> <span>Когда вы</span> <span><em>вместе.</em></span></h2>
+        <p class="intro-description">Люди, процессы и возможности.<br>Объединяем важное для вашего дела.</p>
+        <div class="workspace-parts" aria-label="Клиенты, сделки и команда">
+          <span class="workspace-part"><svg class="icon" aria-hidden="true"><use href="#icon-user"/></svg>Клиенты</span>
+          <span class="part-divider" aria-hidden="true"></span>
+          <span class="workspace-part"><svg class="icon" aria-hidden="true"><use href="#icon-deal"/></svg>Сделки</span>
+          <span class="part-divider" aria-hidden="true"></span>
+          <span class="workspace-part"><svg class="icon" aria-hidden="true"><use href="#icon-team"/></svg>Команда</span>
+        </div>
+      </section>
+      <section class="login-card" aria-labelledby="login-title">
+        <div class="card-top">
+          <div class="card-emblem"><svg class="icon" aria-hidden="true"><use href="#icon-sprout"/></svg></div>
+          <span class="card-overline">ВАШЕ РАБОЧЕЕ ПРОСТРАНСТВО</span>
+        </div>
+        <h1 id="login-title">С возвращением</h1>
+        <p class="card-description">Войдите в аккаунт, чтобы продолжить<br>работу с вашей командой.</p>
+        <form method="post" id="login-form">
+          <!-- Standalone preview: credentials are never submitted or saved. -->
+          <div class="error-box" id="preview-notice" role="status" style="background:#f1f6ee;border-color:#dce7d5;color:#315e40" hidden>Это автономный макет. Вход и создание организации работают в версии, установленной на сайте.</div>
+          
+          <div class="field">
+            <label for="id_username">Имя пользователя</label>
+            <div class="input-wrap">
+              <svg class="icon input-icon" aria-hidden="true"><use href="#icon-user"/></svg>
+              <input type="text" id="id_username" name="username" value="" placeholder="Введите ваш логин" autocomplete="username" autocapitalize="none" spellcheck="false" maxlength="150" required>
+            </div>
+            
+          </div>
+          <div class="field">
+            <label for="id_password">Пароль</label>
+            <div class="input-wrap">
+              <svg class="icon input-icon" aria-hidden="true"><use href="#icon-lock"/></svg>
+              <input class="password-input" type="password" id="id_password" name="password" placeholder="Введите пароль" autocomplete="current-password" required>
+              <button class="password-toggle" id="password-toggle" type="button" aria-label="Показать пароль" aria-controls="id_password" aria-pressed="false" hidden>
+                <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z"/><circle cx="12" cy="12" r="2.5"/><path class="eye-slash" d="m3 3 18 18"/></svg>
+              </button>
+            </div>
+            <p class="caps-lock" id="caps-lock" role="status" hidden>Включён Caps Lock</p>
+            
+          </div>
+          <button class="submit-button" id="submit-button" type="submit">
+            <span id="submit-label">Войти в рабочее пространство</span>
+            <svg class="icon" id="submit-arrow" aria-hidden="true"><use href="#icon-arrow"/></svg>
+            <span class="spinner" id="submit-spinner" aria-hidden="true" hidden></span>
+          </button>
+        </form>
+        <div class="register-area">
+          <p>Впервые в АгроСмене?</p>
+          <a class="register-link" href="#preview-notice">Создать организацию <svg class="icon" aria-hidden="true"><use href="#icon-arrow"/></svg></a>
+        </div>
+        <p class="card-footnote"><svg class="icon" aria-hidden="true"><use href="#icon-lock"/></svg>Единое пространство вашей организации</p>
+      </section>
+      <span class="scene-signature" aria-hidden="true">АГРОСМЕНА · РАСТЁМ ВМЕСТЕ</span>
+      <button class="motion-toggle" id="motion-toggle" type="button" aria-label="Приостановить анимацию фона" aria-pressed="false" title="Приостановить анимацию фона" hidden>
+        <svg class="icon" id="pause-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14M16 5v14" stroke-width="3"/></svg>
+        <svg class="icon" id="play-icon" viewBox="0 0 24 24" aria-hidden="true" hidden><path d="m8 5 11 7-11 7Z"/></svg>
+      </button>
+    </main>
+    <footer class="footer">
+      <p>© 2026 АгроСмена CRM</p>
+      <p class="footer-right"><svg class="icon" aria-hidden="true"><use href="#icon-globe"/></svg>Создано для совместной работы</p>
+    </footer>
+  </div>
+  <script>
+    (() => {
+      'use strict';
+      // Native POST, Django CSRF and server-side authentication stay in charge.
+      const form = document.getElementById('login-form');
+      const password = document.getElementById('id_password');
+      const togglePassword = document.getElementById('password-toggle');
+      const capsLock = document.getElementById('caps-lock');
+      const submit = document.getElementById('submit-button');
+      const submitLabel = document.getElementById('submit-label');
+      const submitArrow = document.getElementById('submit-arrow');
+      const submitSpinner = document.getElementById('submit-spinner');
+      let recoveryTimeout;
+      togglePassword.hidden = false;
+      togglePassword.addEventListener('click', () => {
+        const visible = password.type === 'password';
+        const start = password.selectionStart;
+        const end = password.selectionEnd;
+        password.type = visible ? 'text' : 'password';
+        togglePassword.setAttribute('aria-pressed', String(visible));
+        togglePassword.setAttribute('aria-label', visible ? 'Скрыть пароль' : 'Показать пароль');
+        password.focus({ preventScroll: true });
+        if (start !== null && end !== null) password.setSelectionRange(start, end);
+      });
+      const checkCapsLock = (event) => { capsLock.hidden = !event.getModifierState?.('CapsLock'); };
+      password.addEventListener('keydown', checkCapsLock);
+      password.addEventListener('keyup', checkCapsLock);
+      password.addEventListener('blur', () => { capsLock.hidden = true; });
+      function resetSubmit() {
+        clearTimeout(recoveryTimeout);
+        submit.disabled = false;
+        form.removeAttribute('aria-busy');
+        submitLabel.textContent = 'Войти в рабочее пространство';
+        submitArrow.removeAttribute('hidden');
+        submitSpinner.hidden = true;
+      }
+      // The standalone file previews interactions without contacting any server.
+      function showPreviewNotice(event) {
+        event.preventDefault();
+        document.getElementById('preview-notice').hidden = false;
+      }
+      form.addEventListener('submit', showPreviewNotice);
+      document.querySelector('.register-link').addEventListener('click', showPreviewNotice);
+      window.addEventListener('pageshow', resetSubmit);
+
+      // Slowly shifting contour ribbons, rendered locally with no dependencies.
+      const canvas = document.getElementById('landscape');
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+      const scene = document.getElementById('scene');
+      const motionToggle = document.getElementById('motion-toggle');
+      const pauseIcon = document.getElementById('pause-icon');
+      const playIcon = document.getElementById('play-icon');
+      const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+      const finePointer = window.matchMedia('(hover: hover) and (pointer: fine)');
+      let paused = reducedMotion.matches;
+      let width = 0, height = 0, frame = 0, lastTime = 0, phase = 0;
+      let pointerX = 0, pointerY = 0, driftX = 0, driftY = 0;
+      function draw() {
+        ctx.clearRect(0, 0, width, height);
+        ctx.save();
+        ctx.translate(driftX, driftY);
+        const breath = Math.sin(phase * .7);
+        for (let i = 0; i < 66; i++) {
+          const p = i / 65;
+          const wave = Math.sin(phase * .85 + p * 3.6);
+          ctx.beginPath();
+          ctx.moveTo(-width * .15, height * (.54 + p * .72));
+          ctx.bezierCurveTo(
+          width * (.25 + wave * .065), height * (1.38 - p * .22 + breath * .09),
+          width * (.48 + p * .2 + wave * .07), height * (-.40 + p * .62 + breath * .06),
+          width * 1.15, height * (.13 + p * .79 + breath * .075)
+          );
+          ctx.strokeStyle = `rgba(188, 213, 160, ${.15 + Math.sin(p * Math.PI) * .22})`;
+          ctx.lineWidth = i % 6 === 0 ? 1.35 : .85;
+          ctx.stroke();
+        }
+        for (let i = 0; i < 28; i++) {
+          const p = i / 27;
+          ctx.beginPath();
+          ctx.moveTo(width * (.35 + p * .029), -height * .12);
+          ctx.bezierCurveTo(
+          width * (.46 + p * .26), height * (.48 + breath * .08),
+            width * (.83 + p * .27), -height * (.15 - p * .47),
+            width * 1.1, height * (.30 + p * .37)
+          );
+          ctx.strokeStyle = `rgba(177, 204, 155, ${.07 + p * .09})`;
+          ctx.lineWidth = .7;
+          ctx.stroke();
+        }
+        ctx.restore();
+      }
+      function animate(time) {
+        frame = 0;
+        if (paused || document.hidden) return;
+        // Cap decoration at 30fps; never catch up after a pause.
+        if (!lastTime || time - lastTime >= 32) {
+          const elapsed = lastTime ? Math.min((time - lastTime) / 1000, .06) : 0;
+          lastTime = time;
+          phase += elapsed;
+          driftX += (pointerX - driftX) * .035;
+          driftY += (pointerY - driftY) * .035;
+          draw();
+        }
+        frame = requestAnimationFrame(animate);
+      }
+      function syncMotion() {
+        cancelAnimationFrame(frame);
+        frame = 0;
+        lastTime = 0;
+        const label = paused ? 'Включить анимацию фона' : 'Приостановить анимацию фона';
+        motionToggle.setAttribute('aria-label', label);
+        motionToggle.setAttribute('title', label);
+        motionToggle.setAttribute('aria-pressed', String(paused));
+        pauseIcon.toggleAttribute('hidden', paused);
+        playIcon.toggleAttribute('hidden', !paused);
+        if (!paused && !document.hidden) frame = requestAnimationFrame(animate);
+      }
+      function resize() {
+        const rect = scene.getBoundingClientRect();
+        width = rect.width;
+        height = rect.height;
+        const ratio = Math.min(window.devicePixelRatio || 1, 2);
+        canvas.width = Math.round(width * ratio);
+        canvas.height = Math.round(height * ratio);
+        ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+        draw();
+      }
+      scene.addEventListener('pointermove', (event) => {
+        if (paused || !finePointer.matches) return;
+        const rect = scene.getBoundingClientRect();
+        pointerX = ((event.clientX - rect.left) / width - .5) * 16;
+        pointerY = ((event.clientY - rect.top) / height - .5) * 12;
+      }, { passive: true });
+      scene.addEventListener('pointerleave', () => { pointerX = 0; pointerY = 0; });
+      motionToggle.hidden = false;
+      motionToggle.addEventListener('click', () => { paused = !paused; syncMotion(); });
+      reducedMotion.addEventListener('change', (event) => {
+        paused = event.matches;
+        pointerX = pointerY = driftX = driftY = 0;
+        draw();
+        syncMotion();
+      });
+      document.addEventListener('visibilitychange', syncMotion);
+      window.addEventListener('pagehide', () => { cancelAnimationFrame(frame); frame = 0; });
+      window.addEventListener('pageshow', syncMotion);
+      if ('ResizeObserver' in window) new ResizeObserver(resize).observe(scene);
+      else window.addEventListener('resize', resize, { passive: true });
+      resize();
+      syncMotion();
+    })();
+  </script>
+</body>
+</html>
