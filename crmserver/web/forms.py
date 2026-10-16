@@ -5,6 +5,13 @@ from django import forms
 from customers.models import Customer
 from deals.models import Deal
 from tasks.models import Task
+from accounts.models import Membership
+
+
+class MembershipChoiceField(forms.ModelMultipleChoiceField):
+    def label_from_instance(self, membership):
+        name = membership.user.get_full_name().strip()
+        return f'{name} · {membership.user.username}' if name else membership.user.username
 
 
 class StyledModelForm(forms.ModelForm):
@@ -55,13 +62,23 @@ class DealForm(StyledModelForm):
 
 
 class TaskForm(StyledModelForm):
+    assignees = MembershipChoiceField(
+        queryset=Membership.objects.none(), required=False, label='Сотрудники',
+        help_text='Никого не выбирайте, чтобы задача отображалась у всех сотрудников.',
+        widget=forms.CheckboxSelectMultiple,
+    )
+
     class Meta:
         model = Task
-        fields = ['title', 'description', 'customer', 'deal', 'due_date', 'priority', 'status']
+        fields = ['title', 'description', 'customer', 'deal', 'due_date', 'priority', 'status', 'assignees']
         labels = {'customer': 'Клиент', 'deal': 'Сделка'}
         widgets = {'due_date': forms.DateInput(format='%Y-%m-%d', attrs={'type': 'date'})}
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        organization = self.instance.organization if self.instance.organization_id else None
+        self.fields['assignees'].queryset = (Membership.objects.filter(
+            organization=organization, user__is_active=True).select_related('user')
+            if organization else Membership.objects.none())
         self.fields['deal'].queryset = self.fields['deal'].queryset.select_related('customer')
         self.fields['deal'].help_text = 'Если выбран клиент, сделка должна принадлежать ему.'

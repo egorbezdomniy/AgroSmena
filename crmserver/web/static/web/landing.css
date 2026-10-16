@@ -292,7 +292,11 @@ main, .footer { position: relative; }
 .footer-links a:hover { text-decoration: underline; text-underline-offset: 4px; }
 .footer-links a:last-child { color: var(--deep); font-weight: 600; }
 .footer-links a > span { margin-left: 5px; }
-.footer-bottom { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 15px; margin-top: 32px; padding-top: 18px; border-top: 1px solid #e2e6d9; font-size: 10px; color: #617163; }
+.footer-bottom { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 15px; margin-top: 32px; padding-top: 18px; font-size: 10px; color: #617163; }
+.hero-platforms { flex-wrap: wrap; }
+.hero-platforms .button-download, .footer-links .button-download { min-height: 56px; padding: 16px 24px; font-size: 14px; color: var(--deep); background: #e5edda; border: 1px solid #cbd8bb; border-radius: 12px; text-decoration: none; }
+.hero-platforms .button-download:hover, .footer-links .button-download:hover { background: #dbe7cb; text-decoration: none; }
+.hero-platforms .button-download .icon { width: 21px; height: 21px; }
 .motion-toggle { display: inline-flex; align-items: center; gap: 6px; padding: 8px; border: 1px solid transparent; border-radius: 6px; background: transparent; color: #6d7b60; font-size: 9px; }
 .motion-toggle .icon { width: 13px; height: 13px; }
 .motion-toggle:hover:not(:disabled) { border-color: #d1dac2; background: #ecf0e2; }

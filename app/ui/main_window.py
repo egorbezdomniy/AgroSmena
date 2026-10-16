@@ -42,13 +42,13 @@ class MainWindow(QMainWindow):
 
         customer_service = CustomerService(session_factory)
         deal_service = DealService(session_factory)
-        task_service = TaskService(session_factory)
+        task_service = TaskService(session_factory, self.sync_service.current_username)
 
-        self.dashboard_page = DashboardPage(DashboardService(session_factory))
+        self.dashboard_page = DashboardPage(DashboardService(session_factory, self.sync_service.current_username))
         self.customers_page = CustomersPage(customer_service)
         self.deals_page = DealsPage(deal_service, customer_service)
         self.dashboard_page.stage_change_requested.connect(self.deals_page.change_stage)
-        self.tasks_page = TasksPage(task_service, customer_service, deal_service)
+        self.tasks_page = TasksPage(task_service, customer_service, deal_service, self.sync_service.members)
         self.updates_page = UpdatesPage()
         self.updates_page.install_requested.connect(self._install_update)
         self.pages = [
@@ -211,11 +211,13 @@ class MainWindow(QMainWindow):
         self.sync_status.setText(f"{identity['username']}\n{identity['organization_name']}\nГотово к синхронизации")
         self.sync_status.setToolTip('')
         self._update_server_buttons()
+        self._refresh_after_change()
 
     def _server_logout(self):
         self.sync_service.logout(forget=True)
         self.sync_status.setText('Офлайн · вход не выполнен')
         self._update_server_buttons()
+        self._refresh_after_change()
 
     def _update_server_buttons(self):
         logged_in = bool(self.sync_service.client and self.sync_service.client.token)

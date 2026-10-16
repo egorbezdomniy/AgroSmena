@@ -8,21 +8,21 @@
   <meta name="theme-color" content="#103c2f">
   <link rel="icon" type="image/png" href="{% static 'web/crm-logo.png' %}?v=20260917-3">
   <link rel="stylesheet" href="{% static 'web/style.css' %}?v=20260905-3">
-  <link rel="stylesheet" href="{% static 'web/theme.css' %}?v=20260919-2">
+  <link rel="stylesheet" href="{% static 'web/theme.css' %}?v=20260924-1">
   <script src="{% static 'web/app.js' %}?v=20260919-2" defer></script>
 </head>
 <body>
 <a class="skip-link" href="#main">К содержимому</a>
 <aside class="sidebar">
-  <a class="brand" href="{% url 'web:dashboard' %}"><img src="{% static 'web/brand-mark.svg' %}" alt="" width="38" height="38"><span>АгроСмена<small>CRM · Рабочее пространство</small></span></a>
+  <a class="brand" href="{% if user.is_authenticated %}{% url 'web:dashboard' %}{% else %}{% url 'web:landing' %}{% endif %}"><img src="{% static 'web/brand-mark.svg' %}" alt="" width="38" height="38"><span>АгроСмена</span></a>
   <button class="menu-toggle" type="button" aria-controls="navigation" aria-expanded="true">Меню ☰</button>
   {% with current_url=request.resolver_match.url_name %}
   <nav id="navigation" aria-label="Основное меню">
-    <span class="nav-caption">РАБОЧЕЕ ПРОСТРАНСТВО</span>
     <a href="{% url 'web:dashboard' %}" {% if section == 'dashboard' %}aria-current="page"{% endif %}><span aria-hidden="true">◫</span> Главная</a>
     <a href="{% url 'web:customers' %}" {% if section == 'customers' %}aria-current="page"{% endif %}><span aria-hidden="true">◎</span> Клиенты</a>
     <a href="{% url 'web:deals' %}" {% if section == 'deals' %}aria-current="page"{% endif %}><span aria-hidden="true">▤</span> Сделки</a>
     <a href="{% url 'web:tasks' %}" {% if section == 'tasks' %}aria-current="page"{% endif %}><span aria-hidden="true">☑</span> Задачи</a>
+    {% if current_storefront %}<a href="{{ current_storefront.get_absolute_url }}"><span aria-hidden="true">❀</span> Перейти на страницу товаров</a>{% elif can_manage_users %}<a href="{% url 'catalog:create' %}" {% if section == 'catalog' %}aria-current="page"{% endif %}><span aria-hidden="true">＋</span> Создать страницу товаров</a>{% endif %}
     <a href="{% url 'accounts:profile' %}" {% if current_url == 'profile' %}aria-current="page"{% endif %}><span aria-hidden="true">○</span> Мой профиль</a>
     <a href="{% url 'download' %}"><span aria-hidden="true">↓</span> Скачать программу</a>
     {% if user.is_superuser %}<a href="{% url 'installer-admin' %}" {% if section == 'installer-admin' %}aria-current="page"{% endif %}><span aria-hidden="true">⚙</span> Версии программы</a>{% endif %}

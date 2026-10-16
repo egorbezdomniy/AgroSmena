@@ -8,4 +8,5 @@ class TaskAdmin(admin.ModelAdmin):
     list_filter = ['status', 'priority', 'due_date']
     search_fields = ['title', 'customer__name', 'deal__title', 'uuid']
     autocomplete_fields = ['customer', 'deal']
+    filter_horizontal = ['assignees']
     readonly_fields = ['uuid', 'created_at', 'updated_at']

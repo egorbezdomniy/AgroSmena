@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from sqlalchemy import DateTime, String
+from sqlalchemy import DateTime, String, Text
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.models.base import Base
@@ -30,3 +30,4 @@ class SavedSyncLogin(Base):
     organization_name: Mapped[str] = mapped_column(String(200))
     username: Mapped[str] = mapped_column(String(150))
     protected_token: Mapped[str] = mapped_column(String(8192))
+    members_json: Mapped[str] = mapped_column(Text, nullable=False, default='[]')

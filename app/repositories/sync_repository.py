@@ -1,5 +1,6 @@
 from datetime import date, datetime, timezone
 from decimal import Decimal
+import json
 
 from sqlalchemy import event, select
 from sqlalchemy.orm import Session
@@ -64,6 +65,12 @@ class SyncRepository:
                         relation = key.removesuffix('_id')
                         linked = getattr(obj, relation)
                         fields[f'{relation}_uuid'] = linked.uuid if linked else None
+                    elif key == 'assignee_usernames':
+                        try:
+                            assignees = json.loads(value)
+                            fields[key] = assignees if isinstance(assignees, list) else []
+                        except (TypeError, ValueError):
+                            fields[key] = []
                     else:
                         fields[key] = value.isoformat() if isinstance(value, date) else str(value) if isinstance(value, Decimal) else value
                 changes.append({'entity': entity, 'uuid': obj.uuid, 'created_at': iso(obj.created_at),
@@ -114,6 +121,10 @@ class SyncRepository:
                         value = date.fromisoformat(value)
                     if key == 'amount':
                         value = Decimal(value)
+                    if key == 'assignee_usernames':
+                        if not isinstance(value, list) or any(not isinstance(item, str) for item in value):
+                            raise ValueError('Сервер вернул некорректных исполнителей задачи.')
+                        value = json.dumps(list(dict.fromkeys(value)), ensure_ascii=False)
                     setattr(obj, key, value)
                 obj.created_at = parse_time(row['created_at'])
                 obj.updated_at = parse_time(row['updated_at'])

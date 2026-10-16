@@ -27,7 +27,7 @@ class Task(RecordMixin, Base):
     due_date: Mapped[date | None] = mapped_column(Date, nullable=True, index=True)
     priority: Mapped[str] = mapped_column(String(30), nullable=False, index=True)
     status: Mapped[str] = mapped_column(String(30), nullable=False, index=True)
+    assignee_usernames: Mapped[str] = mapped_column(Text, nullable=False, default="[]")
 
     customer: Mapped["Customer | None"] = relationship(back_populates="tasks")
     deal: Mapped["Deal | None"] = relationship(back_populates="tasks")
-

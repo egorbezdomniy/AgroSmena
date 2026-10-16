@@ -1,0 +1,6 @@
+{% extends 'catalog/base.html' %}
+{% block title %}Удалить товар{% endblock %}
+{% block content %}
+<div class="editor-heading"><p class="eyebrow">УПРАВЛЕНИЕ КАТАЛОГОМ</p><h1>Удалить товар?</h1></div>
+<form class="editor-panel" method="post">{% csrf_token %}<p>«{{ product.name }}» и его фотография будут удалены. Можно также скрыть товар, сняв отметку «Показывать в каталоге» при редактировании.</p><div class="form-actions"><button class="button danger-button" type="submit">Удалить</button><a class="text-link" href="{{ product.get_absolute_url }}">Отмена</a></div></form>
+{% endblock %}

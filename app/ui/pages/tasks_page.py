@@ -18,12 +18,14 @@ class TasksPage(CrudPage):
         service: TaskService,
         customer_service: CustomerService,
         deal_service: DealService,
+        members_provider=None,
         parent=None,
     ) -> None:
         super().__init__(parent)
         self.service = service
         self.customer_service = customer_service
         self.deal_service = deal_service
+        self.members_provider = members_provider or (lambda: [])
 
         self.search = QLineEdit()
         self.search.setPlaceholderText("Поиск по задаче, клиенту или сделке…")
@@ -49,7 +51,7 @@ class TasksPage(CrudPage):
         toolbar.addWidget(add_button)
 
         self.table = make_table(
-            ["Название", "Срок", "Приоритет", "Статус", "Клиент", "Сделка", "Действия"]
+            ["Название", "Срок", "Приоритет", "Статус", "Сотрудники", "Клиент", "Сделка", "Действия"]
         )
         self.table.itemClicked.connect(self._open_from_item)
 
@@ -71,6 +73,7 @@ class TasksPage(CrudPage):
                 item.due_date.strftime("%d.%m.%Y") if item.due_date else "—",
                 item.priority,
                 item.status,
+                self._assignee_text(item),
                 item.customer_name or "—",
                 item.deal_title or "—",
             ]
@@ -80,7 +83,7 @@ class TasksPage(CrudPage):
                 self.table.setItem(row, column, cell)
             self.table.setCellWidget(
                 row,
-                6,
+                7,
                 action_buttons(
                     lambda _checked=False, record_id=item.id: self.edit_task(record_id),
                     lambda _checked=False, record_id=item.id, title=item.title: self.delete_task(
@@ -91,8 +94,16 @@ class TasksPage(CrudPage):
 
     def _dialog(self, task=None) -> TaskDialog:
         return TaskDialog(
-            self.customer_service.list(), self.deal_service.list(), task=task, parent=self
+            self.customer_service.list(), self.deal_service.list(), self.members_provider(),
+            task=task, parent=self
         )
+
+    def _assignee_text(self, task) -> str:
+        if not task.assignee_usernames:
+            return 'Все сотрудники'
+        names = {item.get('username'): item.get('name') or item.get('username')
+                 for item in self.members_provider() if isinstance(item, dict)}
+        return ', '.join(names.get(username, username) for username in task.assignee_usernames)
 
     def add_task(self) -> None:
         dialog = self._dialog()
@@ -118,6 +129,7 @@ class TasksPage(CrudPage):
         DetailDialog(item.title, '', [
             ('Описание', item.description), ('Срок', item.due_date), ('Приоритет', item.priority),
             ('Статус', item.status), ('Клиент', item.customer_name), ('Сделка', item.deal_title),
+            ('Сотрудники', self._assignee_text(item)),
             ('UUID', item.uuid), ('Создана', item.created_at), ('Изменена', item.updated_at),
         ], links=links, parent=self).exec()
 

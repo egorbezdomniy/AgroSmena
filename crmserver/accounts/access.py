@@ -31,6 +31,8 @@ class OrganizationQuerysetMixin(OrganizationRequiredMixin):
 
 
 def organization_context(request):
+    from catalog.models import Storefront
     membership = membership_for(request.user)
     return {'current_membership': membership,
+            'current_storefront': Storefront.objects.defer('logo').filter(organization=membership.organization).first() if membership else None,
             'can_manage_users': bool(membership and membership.role == Membership.Role.ADMIN)}

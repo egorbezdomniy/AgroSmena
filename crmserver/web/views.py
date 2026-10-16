@@ -2,7 +2,7 @@ from decimal import Decimal
 
 from django.contrib import messages
 from django.contrib.messages.views import SuccessMessageMixin
-from django.db.models import Q, Sum
+from django.db.models import Prefetch, Q, Sum
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse, reverse_lazy
 from django.http import HttpResponseRedirect
@@ -12,7 +12,7 @@ from django.views.generic import CreateView, DeleteView, DetailView, ListView, T
 
 from customers.models import Customer
 from deals.models import Deal
-from tasks.models import Task
+from tasks.models import Task, visible_tasks
 from web.forms import CustomerForm, DealForm, TaskForm
 from accounts.access import OrganizationRequiredMixin, OrganizationQuerysetMixin
 
@@ -33,7 +33,8 @@ class DashboardView(OrganizationRequiredMixin, TemplateView):
         context = super().get_context_data(**kwargs)
         today = timezone.localdate()
         active = Deal.objects.filter(organization=self.organization).exclude(stage__in=[Deal.Stage.WON, Deal.Stage.LOST])
-        pending = Task.objects.filter(organization=self.organization, status__in=[Task.Status.NEW, Task.Status.IN_PROGRESS])
+        pending = visible_tasks(Task.objects.filter(
+            organization=self.organization, status__in=[Task.Status.NEW, Task.Status.IN_PROGRESS]), self.membership)
         context.update(
             section='dashboard', today=today, customer_count=Customer.objects.filter(organization=self.organization).count(),
             active_deals=active.count(), active_amount=active.aggregate(total=Sum('amount'))['total'] or Decimal('0'),
@@ -42,7 +43,8 @@ class DashboardView(OrganizationRequiredMixin, TemplateView):
             pending_tasks=pending.count(),
             deal_stages=Deal.Stage.choices,
             recent_deals=Deal.objects.filter(organization=self.organization).select_related('customer')[:5],
-            upcoming_tasks=pending.select_related('customer').filter(due_date__isnull=False).order_by('due_date', 'id')[:5],
+            upcoming_tasks=pending.select_related('customer').prefetch_related('assignees__user').filter(
+                due_date__isnull=False).order_by('due_date', 'id')[:5],
         )
         return context
 
@@ -73,7 +75,8 @@ class DealStageView(OrganizationRequiredMixin, View):
 
 class TaskStatusView(OrganizationRequiredMixin, View):
     def post(self, request, pk):
-        task = get_object_or_404(Task, pk=pk, organization=self.organization)
+        task = get_object_or_404(visible_tasks(
+            Task.objects.filter(organization=self.organization), self.membership), pk=pk)
         status = request.POST.get('status')
         if status not in Task.Status.values:
             messages.error(request, 'Выберите существующий статус задачи.')
@@ -135,7 +138,8 @@ class TaskListView(FilteredListView):
     template_name = 'web/tasks.html'
 
     def get_queryset(self):
-        records = super().get_queryset().select_related('customer', 'deal')
+        records = visible_tasks(super().get_queryset(), self.membership).select_related(
+            'customer', 'deal').prefetch_related('assignees__user')
         query = self.request.GET.get('q', '').strip()
         if query:
             records = records.filter(Q(title__icontains=query) | Q(description__icontains=query)
@@ -175,7 +179,8 @@ class CustomerDetailView(RecordDetailView):
     delete_name = 'web:customer-delete'
 
     def get_queryset(self):
-        return super().get_queryset().prefetch_related('deals', 'tasks')
+        task_records = visible_tasks(Task.objects.filter(organization=self.organization), self.membership)
+        return super().get_queryset().prefetch_related('deals', Prefetch('tasks', queryset=task_records))
 
 
 class DealDetailView(RecordDetailView):
@@ -186,7 +191,9 @@ class DealDetailView(RecordDetailView):
     delete_name = 'web:deal-delete'
 
     def get_queryset(self):
-        return super().get_queryset().select_related('customer').prefetch_related('tasks')
+        task_records = visible_tasks(Task.objects.filter(organization=self.organization), self.membership)
+        return super().get_queryset().select_related('customer').prefetch_related(
+            Prefetch('tasks', queryset=task_records))
 
 
 class TaskDetailView(RecordDetailView):
@@ -197,7 +204,8 @@ class TaskDetailView(RecordDetailView):
     delete_name = 'web:task-delete'
 
     def get_queryset(self):
-        return super().get_queryset().select_related('customer', 'deal')
+        return visible_tasks(super().get_queryset(), self.membership).select_related(
+            'customer', 'deal').prefetch_related('assignees__user')
 
 
 class EditorMixin(OrganizationQuerysetMixin, SuccessMessageMixin):
@@ -249,6 +257,9 @@ class TaskEditor(EditorMixin):
     section = 'tasks'
     success_url = reverse_lazy('web:tasks')
 
+    def get_queryset(self):
+        return visible_tasks(super().get_queryset(), self.membership)
+
 
 class TaskCreateView(TaskEditor, CreateView):
     page_title = 'Новая задача'
@@ -286,3 +297,6 @@ class TaskDeleteView(ConfirmDeleteView):
     model = Task
     section = 'tasks'
     success_url = reverse_lazy('web:tasks')
+
+    def get_queryset(self):
+        return visible_tasks(super().get_queryset(), self.membership)

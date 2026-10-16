@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from datetime import date
+import json
 
 from sqlalchemy.orm import sessionmaker
 
@@ -13,20 +14,21 @@ from app.services.mappers import task_to_dto
 
 
 class TaskService:
-    def __init__(self, session_factory: sessionmaker) -> None:
+    def __init__(self, session_factory: sessionmaker, username_provider=None) -> None:
         self.session_factory = session_factory
+        self.username_provider = username_provider or (lambda: None)
 
     def list(
         self, search: str = "", status: str | None = None, priority: str | None = None
     ) -> list[TaskDTO]:
         with self.session_factory() as session:
             items = TaskRepository(session).list(search, status, priority)
-            return [task_to_dto(item) for item in items]
+            return [task_to_dto(item) for item in items if self._is_visible(item)]
 
     def get(self, task_id: int) -> TaskDTO:
         with self.session_factory() as session:
             task = TaskRepository(session).get(task_id)
-            if task is None:
+            if task is None or not self._is_visible(task):
                 raise NotFoundError("Задача не найдена.")
             return task_to_dto(task)
 
@@ -44,7 +46,7 @@ class TaskService:
             self._validate_relations(session, clean)
             repository = TaskRepository(session)
             task = repository.get(task_id)
-            if task is None:
+            if task is None or not self._is_visible(task):
                 raise NotFoundError("Задача не найдена.")
             for field, value in clean.items():
                 setattr(task, field, value)
@@ -55,9 +57,19 @@ class TaskService:
         with self.session_factory.begin() as session:
             repository = TaskRepository(session)
             task = repository.get(task_id)
-            if task is None:
+            if task is None or not self._is_visible(task):
                 raise NotFoundError("Задача не найдена.")
             repository.delete(task)
+
+    def _is_visible(self, task) -> bool:
+        try:
+            usernames = json.loads(task.assignee_usernames or '[]')
+        except (TypeError, ValueError):
+            usernames = []
+        if not isinstance(usernames, list):
+            usernames = []
+        username = self.username_provider()
+        return not usernames or bool(username and username in usernames)
 
     @staticmethod
     def _validate(data: dict) -> dict:
@@ -73,6 +85,13 @@ class TaskService:
         due_date = data.get("due_date")
         if due_date is not None and not isinstance(due_date, date):
             raise ValidationError("Введите корректный срок задачи.")
+        assignees = []
+        for value in data.get('assignee_usernames', ()):
+            username = str(value).strip()
+            if not username or len(username) > 150:
+                raise ValidationError('Выберите корректных сотрудников.')
+            if username not in assignees:
+                assignees.append(username)
         return {
             "title": title,
             "description": str(data.get("description", "")).strip(),
@@ -81,6 +100,7 @@ class TaskService:
             "due_date": due_date,
             "priority": priority,
             "status": status,
+            "assignee_usernames": json.dumps(assignees, ensure_ascii=False),
         }
 
     @staticmethod
@@ -95,4 +115,3 @@ class TaskService:
                 raise ValidationError("Выбранная сделка не найдена.")
             if customer_id and deal.customer_id != customer_id:
                 raise ValidationError("Выбранная сделка принадлежит другому клиенту.")
-

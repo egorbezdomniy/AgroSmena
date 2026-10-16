@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from PySide6.QtCore import Qt, Signal
-from PySide6.QtWidgets import QFrame, QGridLayout, QHBoxLayout, QLabel, QSizePolicy, QVBoxLayout, QWidget
+from PySide6.QtWidgets import QFrame, QGridLayout, QHBoxLayout, QHeaderView, QLabel, QSizePolicy, QVBoxLayout, QWidget
 
 from app.services import DashboardService
 from app.ui.widgets import set_deal_stage_cell, format_money, make_table, page_heading, panel_layout, table_item
@@ -53,7 +53,6 @@ class DashboardPage(QWidget):
         title = QLabel("Последние сделки")
         title.setObjectName("sectionTitle")
         self.deals_table = make_table(["Название", "Клиент", "Стадия", "Сумма"])
-        self.deals_table.horizontalHeader().setStretchLastSection(False)
         self.deals_table.setMinimumHeight(245)
         deals_layout.addWidget(title)
         deals_layout.addWidget(self.deals_table)
@@ -62,6 +61,11 @@ class DashboardPage(QWidget):
         title = QLabel("Ближайшие задачи")
         title.setObjectName("sectionTitle")
         self.tasks_table = make_table(["Задача", "Срок", "Приоритет", "Статус"])
+        for table in (self.deals_table, self.tasks_table):
+            header = table.horizontalHeader()
+            header.setStretchLastSection(False)
+            header.setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
+            header.setDefaultAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter)
         self.tasks_table.setMinimumHeight(245)
         tasks_layout.addWidget(title)
         tasks_layout.addWidget(self.tasks_table)
@@ -101,7 +105,6 @@ class DashboardPage(QWidget):
                 self.deals_table, row, item.stage,
                 lambda stage, record_id=item.id: self.stage_change_requested.emit(record_id, stage),
             )
-        self.deals_table.resizeColumnToContents(2)
 
         self.tasks_table.setRowCount(len(summary.upcoming_tasks))
         for row, item in enumerate(summary.upcoming_tasks):

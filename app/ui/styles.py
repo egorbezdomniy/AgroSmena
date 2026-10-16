@@ -80,6 +80,7 @@ QTableWidget {
     border: none; border-radius: 0; gridline-color: #edf1eb;
 }
 QTableWidget::item:hover { background: #f4f8f1; }
+QHeaderView { background: #f5f8f2; }
 QHeaderView::section {
     background: #f5f8f2; color: #708077; border: none;
     border-bottom: 1px solid #e2e9e1; padding: 9px; font-weight: 600;

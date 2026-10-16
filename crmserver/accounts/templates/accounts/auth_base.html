@@ -8,13 +8,13 @@
   <title>{% block title %}Вход{% endblock %} · АгроСмена</title>
   <link rel="icon" type="image/png" href="{% static 'web/crm-logo.png' %}?v=20260917-3">
   <link rel="stylesheet" href="{% static 'web/style.css' %}?v=20260905-3">
-  <link rel="stylesheet" href="{% static 'web/theme.css' %}?v=20260919-2">
+  <link rel="stylesheet" href="{% static 'web/theme.css' %}?v=20260924-1">
   <script src="{% static 'web/app.js' %}?v=20260919-2" defer></script>
 </head>
 <body class="auth-page {% block auth_page_class %}{% endblock %}">
   <a class="skip-link" href="#auth-form">К форме</a>
   <header class="auth-header">
-    <a class="auth-brand" href="{% url 'accounts:login' %}"><img src="{% static 'web/brand-mark.svg' %}" width="38" height="38" alt=""><span>АгроСмена</span><span class="brand-tag">CRM</span></a>
+    <a class="auth-brand" href="{% if user.is_authenticated %}{% url 'web:dashboard' %}{% else %}{% url 'web:landing' %}{% endif %}"><img src="{% static 'web/brand-mark.svg' %}" width="38" height="38" alt=""><span>АгроСмена</span><span class="brand-tag">CRM</span></a>
     <span class="auth-header-note">Больше возможностей. Вместе.</span>
   </header>
   <main class="auth-scene">
@@ -29,6 +29,6 @@
     </section>
     <button class="auth-motion" type="button" aria-pressed="false" hidden>Приостановить фон</button>
   </main>
-  <footer class="auth-footer"><span>© {% now "Y" %} АгроСмена CRM</span><span>Создано для совместной работы</span></footer>
+  <footer class="auth-footer"><span>© {% now "Y" %} АгроСмена CRM</span></footer>
 </body>
 </html>

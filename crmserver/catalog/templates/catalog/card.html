@@ -1,0 +1,13 @@
+<article class="product-card" data-reveal>
+  <a href="{{ item.get_absolute_url }}" class="product-card-link">
+    <div class="card-image">
+      {% if item.photo_digest %}<img src="{% url 'catalog:photo' storefront.slug item.pk %}?v={{ item.photo_digest|slice:':12' }}" alt="{{ item.name }}" width="600" height="660" loading="lazy" decoding="async">
+      {% else %}<div class="botanical-placeholder" aria-hidden="true"><span>✳</span><i></i><i></i></div>{% endif %}
+      {% if not item.published %}<span class="card-status draft">Черновик</span>{% elif not item.in_stock %}<span class="card-status">Нет в наличии</span>{% endif %}
+      <span class="card-open" aria-hidden="true">↗</span>
+    </div>
+    <div class="card-body"><span class="overline">{{ item.product_type.name }}</span><h3>{{ item.name }}</h3>
+      <div class="card-bottom"><strong>{% if item.price != None %}{{ item.price|floatformat:'2g' }} ₽{% else %}Цена по запросу{% endif %}</strong><span>Подробнее ↗</span></div>
+    </div>
+  </a>
+</article>

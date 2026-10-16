@@ -80,7 +80,8 @@ class SyncService:
                 session.delete(saved)
                 return
             client.identity = {'organization': saved.organization_uuid,
-                'organization_name': saved.organization_name, 'username': saved.username}
+                'organization_name': saved.organization_name, 'username': saved.username,
+                'members': self._parse_members(saved.members_json)}
             state = SyncRepository(session).state()
             if state and (state.server_url != client.server_url or state.organization_uuid != saved.organization_uuid):
                 session.delete(saved)
@@ -107,9 +108,29 @@ class SyncService:
         with self.session_factory.begin() as session:
             session.merge(SavedSyncLogin(id=1, server_url=client.server_url,
                 organization_uuid=identity['organization'], organization_name=identity['organization_name'],
-                username=identity['username'], protected_token=encrypted))
+                username=identity['username'], protected_token=encrypted,
+                members_json=json.dumps(identity.get('members', []), ensure_ascii=False)))
         self.client = client
         return identity
+
+    @staticmethod
+    def _parse_members(value):
+        try:
+            members = json.loads(value or '[]')
+            if isinstance(members, list):
+                return [item for item in members if isinstance(item, dict)
+                        and isinstance(item.get('username'), str) and isinstance(item.get('name'), str)]
+        except (TypeError, ValueError):
+            pass
+        return []
+
+    def members(self):
+        identity = self.client.identity if self.client else None
+        return list(identity.get('members', [])) if identity else []
+
+    def current_username(self):
+        identity = self.client.identity if self.client else None
+        return identity.get('username') if identity else None
 
     def logout(self, *, forget=False):
         if self.client:
@@ -151,6 +172,14 @@ class SyncService:
                 if response['organization'] != state.organization_uuid:
                     raise SyncError('Сервер вернул другую организацию. Данные не изменены.')
                 repository.apply_snapshot(response['changes'])
+                raw_members = response.get('members', [])
+                if not isinstance(raw_members, list):
+                    raise SyncError('Сервер вернул некорректный список сотрудников.')
+                members = self._parse_members(json.dumps(raw_members, ensure_ascii=False))
+                client.identity['members'] = members
+                saved = session.get(SavedSyncLogin, 1)
+                if saved:
+                    saved.members_json = json.dumps(members, ensure_ascii=False)
                 state.last_sync_at = parse_time(response['synced_at'])
                 session.commit()
                 return state.last_sync_at

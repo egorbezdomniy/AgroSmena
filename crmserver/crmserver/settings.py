@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     'deals',
     'tasks',
     'web',
+    'catalog.apps.CatalogConfig',
     'accounts.apps.AccountsConfig',
     'synchronization.apps.SynchronizationConfig',
 ]

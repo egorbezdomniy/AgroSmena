@@ -1,0 +1,16 @@
+{% extends 'catalog/base.html' %}
+{% block title %}Каталог товаров{% endblock %}
+{% block content %}
+<div class="catalog-layout">
+  <aside class="filters"><details open><summary>Найти своё <span>＋</span></summary><form method="get">
+    {{ form.non_field_errors }}
+    {% for field in form %}{% if field.name|slice:':5' == 'attr_' and forloop.counter == 7 %}<p class="filter-heading">Характеристики</p>{% endif %}{% include 'catalog/field.html' %}{% endfor %}
+    {% if not form.selected_type %}<p class="help">Выберите тип товара, чтобы уточнить характеристики.</p>{% endif %}
+    <button class="button" type="submit">Показать товары →</button><a class="reset-link" href="{{ storefront.get_absolute_url }}">Сбросить фильтры</a>
+  </form></details></aside>
+  <section class="catalog-results" aria-label="Товары"><div class="results-heading"><h1>{% if form.selected_type %}{{ form.selected_type.name }}{% else %}Все товары{% endif %}</h1><span>{{ page_obj.paginator.count }} товаров</span></div>
+    <div class="product-grid">{% for item in page_obj %}{% include 'catalog/card.html' %}{% empty %}<div class="empty-state"><span aria-hidden="true">✳</span><h3>{% if request.GET %}Пока ничего не нашлось{% else %}Здесь скоро расцветёт коллекция{% endif %}</h3><p>{% if request.GET %}Попробуйте изменить условия поиска.{% elif can_manage %}Добавьте первый товар в свой каталог.{% else %}Загляните чуть позже.{% endif %}</p>{% if request.GET %}<a class="button secondary" href="{{ storefront.get_absolute_url }}">Все товары</a>{% elif can_manage %}<a class="button" href="{% url 'catalog:choose-type' %}">Добавить товар ↗</a>{% endif %}</div>{% endfor %}</div>
+    {% if page_obj.has_other_pages %}<nav class="pagination" aria-label="Страницы каталога">{% if page_obj.has_previous %}<a class="button secondary compact" href="?{{ query_string }}&amp;page={{ page_obj.previous_page_number }}">← Назад</a>{% endif %}<span>{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>{% if page_obj.has_next %}<a class="button secondary compact" href="?{{ query_string }}&amp;page={{ page_obj.next_page_number }}">Далее →</a>{% endif %}</nav>{% endif %}
+  </section>
+</div>
+{% endblock %}

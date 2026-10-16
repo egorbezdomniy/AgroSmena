@@ -1,5 +1,6 @@
 from django.core.exceptions import ValidationError
 from django.db import models
+from django.db.models import Q
 from crmserver.models import OrganizationOwnedModel
 
 
@@ -26,6 +27,8 @@ class Task(OrganizationOwnedModel):
                                  default=Priority.NORMAL, db_index=True)
     status = models.CharField('Статус', max_length=30, choices=Status.choices,
                                default=Status.NEW, db_index=True)
+    assignees = models.ManyToManyField('accounts.Membership', blank=True, related_name='assigned_tasks',
+                                       verbose_name='Сотрудники')
 
     class Meta:
         ordering = ['due_date', 'id']
@@ -39,3 +42,8 @@ class Task(OrganizationOwnedModel):
 
     def __str__(self):
         return self.title
+
+
+def visible_tasks(queryset, membership):
+    """Empty assignee set means that the task belongs to the whole organization."""
+    return queryset.filter(Q(assignees__isnull=True) | Q(assignees=membership)).distinct()

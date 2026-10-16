@@ -1,0 +1,15 @@
+{% extends 'web/base.html' %}
+{% block title %}Создать страницу товаров{% endblock %}
+{% block heading %}Ваш каталог. Открыт для всех.{% endblock %}
+{% block subtitle %}Выберите короткий адрес и поделитесь товарами с клиентами.{% endblock %}
+{% block content %}
+<section class="panel form-panel"><form method="post">{% csrf_token %}
+  {{ form.non_field_errors }}
+  <div class="form-grid"><div class="field wide"><label for="{{ form.slug.id_for_label }}">Адрес каталога</label>
+    <p class="help">{{ request.scheme }}://{{ request.get_host }}/catalog/<strong>ваш-адрес</strong>/</p>
+    {{ form.slug }}<div class="help">{{ form.slug.help_text }}</div><div class="field-errors">{{ form.slug.errors }}</div>
+  </div></div>
+  <p class="help">Готовые типы: цветы, букеты и семена цветов. Свои типы можно добавить после создания.</p>
+  <div class="form-actions"><button class="button primary" type="submit">Создать каталог ↗</button><a class="button" href="{% url 'web:dashboard' %}">Отмена</a></div>
+</form></section>
+{% endblock %}

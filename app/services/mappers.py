@@ -1,3 +1,5 @@
+import json
+
 from app.models import Customer, Deal, Task
 from app.services.dto import CustomerDTO, DealDTO, TaskDTO
 
@@ -35,6 +37,11 @@ def deal_to_dto(deal: Deal) -> DealDTO:
 
 
 def task_to_dto(task: Task) -> TaskDTO:
+    try:
+        values = json.loads(task.assignee_usernames)
+        assignees = tuple(value for value in values if isinstance(value, str)) if isinstance(values, list) else ()
+    except (TypeError, ValueError):
+        assignees = ()
     return TaskDTO(
         id=task.id,
         uuid=task.uuid,
@@ -47,7 +54,7 @@ def task_to_dto(task: Task) -> TaskDTO:
         due_date=task.due_date,
         priority=task.priority,
         status=task.status,
+        assignee_usernames=assignees,
         created_at=task.created_at,
         updated_at=task.updated_at,
     )
-

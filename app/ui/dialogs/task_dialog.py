@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from PySide6.QtCore import QDate
+from PySide6.QtCore import QDate, Qt
 from PySide6.QtWidgets import (
     QCheckBox,
     QComboBox,
@@ -9,6 +9,9 @@ from PySide6.QtWidgets import (
     QDialogButtonBox,
     QFormLayout,
     QLineEdit,
+    QListWidget,
+    QListWidgetItem,
+    QMessageBox,
     QTextEdit,
     QVBoxLayout,
 )
@@ -23,6 +26,7 @@ class TaskDialog(QDialog):
         self,
         customers: list[CustomerDTO],
         deals: list[DealDTO],
+        members: list[dict[str, str]] | None = None,
         task: TaskDTO | None = None,
         parent=None,
     ) -> None:
@@ -50,6 +54,28 @@ class TaskDialog(QDialog):
         self.priority.setCurrentText("Обычный")
         self.status = QComboBox()
         self.status.addItems(TASK_STATUSES)
+        selected_assignees = set(task.assignee_usernames if task else ())
+        member_rows = list(members or [])
+        known = {item.get('username') for item in member_rows}
+        member_rows.extend({'username': username, 'name': username}
+                           for username in selected_assignees if username not in known)
+        self.all_employees = QCheckBox('Все сотрудники')
+        self.all_employees.setChecked(not selected_assignees)
+        self.assignees = QListWidget()
+        self.assignees.setMinimumHeight(116)
+        for member in member_rows:
+            username = member.get('username', '').strip()
+            if not username:
+                continue
+            name = member.get('name', '').strip() or username
+            label = f'{name} · {username}' if name != username else username
+            item = QListWidgetItem(label)
+            item.setData(Qt.ItemDataRole.UserRole, username)
+            item.setFlags(item.flags() | Qt.ItemFlag.ItemIsUserCheckable)
+            item.setCheckState(Qt.CheckState.Checked if username in selected_assignees else Qt.CheckState.Unchecked)
+            self.assignees.addItem(item)
+        self.assignees.setEnabled(not self.all_employees.isChecked())
+        self.all_employees.toggled.connect(lambda checked: self.assignees.setEnabled(not checked))
 
         self.customer.currentIndexChanged.connect(self._on_customer_changed)
         self._fill_deals()
@@ -63,6 +89,7 @@ class TaskDialog(QDialog):
         form.addRow(self.has_due_date, self.due_date)
         form.addRow("Приоритет", self.priority)
         form.addRow("Статус", self.status)
+        form.addRow(self.all_employees, self.assignees)
 
         buttons = QDialogButtonBox(
             QDialogButtonBox.StandardButton.Save | QDialogButtonBox.StandardButton.Cancel
@@ -117,4 +144,17 @@ class TaskDialog(QDialog):
             "due_date": self.due_date.date().toPython() if self.has_due_date.isChecked() else None,
             "priority": self.priority.currentText(),
             "status": self.status.currentText(),
+            "assignee_usernames": [] if self.all_employees.isChecked() else self._selected_assignees(),
         }
+
+    def _selected_assignees(self) -> list[str]:
+        return [self.assignees.item(index).data(Qt.ItemDataRole.UserRole)
+                for index in range(self.assignees.count())
+                if self.assignees.item(index).checkState() == Qt.CheckState.Checked]
+
+    def accept(self) -> None:
+        if not self.all_employees.isChecked() and not self._selected_assignees():
+            QMessageBox.warning(self, 'Сотрудники',
+                                'Выберите хотя бы одного сотрудника или включите «Все сотрудники».')
+            return
+        super().accept()

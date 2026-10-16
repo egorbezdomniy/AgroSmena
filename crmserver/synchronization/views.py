@@ -6,6 +6,7 @@ from rest_framework.throttling import ScopedRateThrottle
 from rest_framework.views import APIView
 
 from accounts.access import membership_for
+from accounts.models import Membership
 from accounts.permissions import HasOrganization
 from .auth import SyncAuthentication, issue_token
 from .serializers import ExchangeSerializer, LoginSerializer
@@ -25,8 +26,13 @@ class LoginView(APIView):
         membership = membership_for(user) if user else None
         if not membership:
             return Response({'detail': 'Неверный логин/пароль или нет доступа к организации.'}, status=401)
+        members = Membership.objects.filter(
+            organization=membership.organization, user__is_active=True).select_related('user')
         return Response({'token': issue_token(user, membership), 'organization': str(membership.organization.uuid),
-                         'organization_name': membership.organization.name, 'username': user.username})
+                         'organization_name': membership.organization.name, 'username': user.username,
+                         'members': [{'username': item.user.username,
+                                      'name': item.user.get_full_name().strip() or item.user.username}
+                                     for item in members]})
 
 
 class ExchangeView(APIView):

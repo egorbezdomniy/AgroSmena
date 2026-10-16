@@ -1,0 +1,36 @@
+{% load static %}
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#103c2f">
+  <title>{% block title %}Каталог{% endblock %} · {{ storefront.organization.name }}</title>
+  <link rel="icon" type="image/png" href="{% static 'web/crm-logo.png' %}">
+  <link rel="stylesheet" href="{% static 'catalog/catalog.css' %}?v=20261004-4">
+  <script src="{% static 'catalog/catalog.js' %}?v=20261003-1" defer></script>
+  {% block meta %}{% endblock %}
+</head>
+<body>
+  <a class="skip-link" href="#main">К содержимому</a>
+  <header class="catalog-navbar">
+    <div class="catalog-landscape" aria-hidden="true">
+      <div class="catalog-landscape-sun"></div>
+      <svg class="catalog-contour catalog-contour-one" viewBox="0 0 1440 240" fill="none" preserveAspectRatio="none">
+        <path d="M-160 20C180-100 360 160 720 30S1200-30 1600 100M-160 48C180-72 360 188 720 58S1200-2 1600 128M-160 76C180-44 360 216 720 86S1200 26 1600 156M-160 104C180-16 360 244 720 114S1200 54 1600 184M-160 132C180 12 360 272 720 142S1200 82 1600 212M-160 160C180 40 360 300 720 170S1200 110 1600 240M-160 188C180 68 360 328 720 198S1200 138 1600 268M-160 216C180 96 360 356 720 226S1200 166 1600 296" vector-effect="non-scaling-stroke"/>
+      </svg>
+      <svg class="catalog-contour catalog-contour-two" viewBox="0 0 1440 240" fill="none" preserveAspectRatio="none">
+        <path d="M-160 40C240 200 460-60 820 80S1280 200 1600 60M-160 76C240 236 460-24 820 116S1280 236 1600 96M-160 112C240 272 460 12 820 152S1280 272 1600 132M-160 148C240 308 460 48 820 188S1280 308 1600 168M-160 184C240 344 460 84 820 224S1280 344 1600 204" vector-effect="non-scaling-stroke"/>
+      </svg>
+    </div>
+    <div class="catalog-header shell">
+    <a class="store-brand" href="{{ storefront.get_absolute_url }}">{% if storefront.logo_digest %}<img class="store-logo" src="{% url 'catalog:logo' storefront.slug %}?v={{ storefront.logo_digest|slice:':12' }}" alt="" width="48" height="48">{% else %}<span class="brand-flower" aria-hidden="true">✳</span>{% endif %}<span>{{ storefront.organization.name }}<small>КАТАЛОГ ТОВАРОВ</small></span></a>
+    <div class="header-actions">{% if can_manage %}<a class="text-link" href="{% url 'web:dashboard' %}">В CRM ↗</a><a class="button secondary compact" href="{% url 'catalog:logo-edit' %}">{% if storefront.logo_digest %}Изменить логотип{% else %}Добавить логотип{% endif %}</a><a class="button compact" href="{% url 'catalog:choose-type' %}">＋ Добавить товар</a>{% endif %}<button class="motion-button" type="button" data-motion aria-pressed="false" hidden>Пауза фона</button></div>
+  </div></header>
+  <main id="main" class="shell">
+    {% if messages %}<div aria-live="polite">{% for message in messages %}<p class="notice">{{ message }}</p>{% endfor %}</div>{% endif %}
+    {% block content %}{% endblock %}
+  </main>
+  <footer class="catalog-footer shell"><span>© {% now 'Y' %} {{ storefront.organization.name }}</span><a href="{% url 'web:landing' %}">На платформе АгроСмена ↗</a></footer>
+</body>
+</html>

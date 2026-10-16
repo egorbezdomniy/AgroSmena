@@ -111,6 +111,12 @@ input:hover, select:hover, textarea:hover { border-color: #afc2b1; }
 input:focus, select:focus, textarea:focus { background: #fff; border-color: #62826b; outline: 2px solid #62826b40; outline-offset: 1px; }
 input[type="checkbox"], input[type="radio"] { width: auto; min-height: 0; accent-color: #103c2f; }
 .field label { color: #344d40; font-size: 13px; font-weight: 500; margin-bottom: 9px; }
+.employee-picker > div { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 9px; padding: 14px; border: 1px solid #dce5da; border-radius: 12px; background: #f8faf5; }
+.employee-picker > div label { display: flex; align-items: center; gap: 9px; min-height: 34px; margin: 0; padding: 6px 9px; border-radius: 8px; background: #fff; cursor: pointer; }
+.employee-picker > div label:hover { background: #edf4e9; }
+.task-assignees { min-width: 140px; }
+.task-assignees span { display: block; }
+.task-assignees span + span { margin-top: 4px; }
 .form-panel, .account-panel, .delete-panel { padding: 32px; }
 .form-grid { gap: 24px; }
 .form-actions { gap: 12px; padding-top: 24px; margin-top: 28px; }

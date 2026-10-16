@@ -10,7 +10,7 @@ from customers.serializers import CustomerSerializer
 from rest_framework import serializers
 from deals.models import Deal
 from deals.serializers import DealSerializer
-from tasks.models import Task
+from tasks.models import Task, visible_tasks
 from tasks.serializers import TaskSerializer
 from .models import Tombstone
 from .signals import deletion_time
@@ -59,6 +59,8 @@ def exchange(request, payload):
         # Equal timestamps are resolved consistently in favor of the server.
         if latest is not None and stamp <= latest:
             continue
+        if entity == 'tasks' and obj and not visible_tasks(Task.objects.filter(pk=obj.pk), membership).exists():
+            raise PermissionDenied('Задача назначена другим сотрудникам.')
         if row['deleted']:
             if obj:
                 token = deletion_time.set(stamp)
@@ -112,8 +114,14 @@ def exchange(request, payload):
         if entity == 'deals':
             queryset = queryset.select_related('customer')
         if entity == 'tasks':
-            queryset = queryset.select_related('customer', 'deal')
+            queryset = visible_tasks(queryset, membership).select_related(
+                'customer', 'deal').prefetch_related('assignees__user')
         records.extend(serialize_record(entity, obj) for obj in queryset)
     records.extend({'entity': tomb.entity, 'uuid': str(tomb.uuid), 'updated_at': tomb.updated_at.isoformat(),
                     'deleted': True} for tomb in Tombstone.objects.filter(organization=organization))
-    return {'organization': str(organization.uuid), 'synced_at': timezone.now().isoformat(), 'changes': records}
+    members = Membership.objects.filter(organization=organization, user__is_active=True).select_related('user')
+    return {'organization': str(organization.uuid), 'synced_at': timezone.now().isoformat(),
+            'members': [{'username': item.user.username,
+                         'name': item.user.get_full_name().strip() or item.user.username}
+                        for item in members],
+            'changes': records}

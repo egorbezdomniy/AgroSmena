@@ -1,0 +1,15 @@
+{% extends 'catalog/base.html' %}
+{% block title %}Добавить товар{% endblock %}
+{% block content %}
+<a class="back-link" href="{{ storefront.get_absolute_url }}">← К каталогу</a>
+<div class="editor-heading"><p class="eyebrow">НОВЫЙ ТОВАР</p><h1>Начнём с типа.</h1><p>Он определит характеристики вашего товара.</p></div>
+<div class="type-grid">
+  {% for type in types %}
+  <article class="type-card">
+    <a class="type-select" href="{% url 'catalog:product-add' type.pk %}"><span class="type-mark" aria-hidden="true">✳</span><h2>{{ type.name }}</h2><p>{% for attribute in type.attributes.all %}{{ attribute.name }}{% if not forloop.last %} · {% endif %}{% empty %}Название, описание и цена{% endfor %}</p><span class="text-link">Выбрать тип ↗</span></a>
+    <a class="text-link danger type-delete" href="{% url 'catalog:type-delete' type.pk %}" aria-label="Удалить тип «{{ type.name }}»">Удалить тип</a>
+  </article>
+  {% endfor %}
+  <a class="type-card type-new" href="{% url 'catalog:type-add' %}"><span class="type-mark" aria-hidden="true">＋</span><h2>Свой тип</h2><p>Задайте характеристики, которые важны для ваших товаров.</p><span class="text-link">Создать тип ↗</span></a>
+</div>
+{% endblock %}

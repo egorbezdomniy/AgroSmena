@@ -30,6 +30,7 @@ router.register('deals', DealViewSet)
 router.register('tasks', TaskViewSet)
 
 urlpatterns = [
+    path('catalog/', include('catalog.urls')),
     path('download/', DownloadPageView.as_view(), name='download'),
     path('download/installer/', InstallerDownloadView.as_view(), name='installer-download'),
     path('release-admin/', InstallerAdminView.as_view(), name='installer-admin'),

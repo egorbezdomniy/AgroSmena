@@ -48,6 +48,7 @@ class TaskDTO:
     due_date: date | None
     priority: str
     status: str
+    assignee_usernames: tuple[str, ...]
     created_at: datetime
     updated_at: datetime
 
@@ -61,4 +62,3 @@ class DashboardDTO:
     overdue_tasks: int
     latest_deals: tuple[DealDTO, ...]
     upcoming_tasks: tuple[TaskDTO, ...]
-
