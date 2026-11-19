@@ -122,7 +122,7 @@ HTTP-клиент должен сохранять cookies; для POST/PUT/PATCH
 Примеры POST JSON:
 
 ```json
-{"name": "Анна Петрова", "company_name": "Агро", "email": "anna@example.com"}
+{"name": "Демо-клиент", "company_name": "Демо-компания", "email": "anna@example.com"}
 ```
 
 ```json
