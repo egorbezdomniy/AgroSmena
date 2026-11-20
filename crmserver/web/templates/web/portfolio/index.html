@@ -1,0 +1,89 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0d172d">
+  <title>Портфолио</title>
+  <link rel="stylesheet" href="{% static 'web/portfolio/styles.css' %}">
+  <script src="{% static 'web/portfolio/app.js' %}" defer></script>
+</head>
+<body>
+  <main class="portfolio">
+    <header class="masthead">
+      <h1 id="projects-title">Портфолио</h1>
+      <a class="profile-link" href="https://github.com/egorbezdomniy" target="_blank" rel="noopener noreferrer">GitHub</a>
+    </header>
+    <section class="carousel" aria-labelledby="projects-title" aria-roledescription="карусель">
+      <ul class="track" id="project-track" tabindex="0" aria-label="Список проектов">
+        <li class="project project--agro">
+          <a class="art" href="https://crm.dushinnova.online/" target="_blank" rel="noopener noreferrer" aria-label="Открыть сайт AgroSmena">
+            <img src="{% static 'web/portfolio/previews/agrosmena.jpg' %}" width="1120" height="642" alt="" decoding="async">
+          </a>
+          <div class="project-body">
+            <h2>AgroSmena</h2>
+            <div class="actions">
+              <a class="action action--primary" href="https://crm.dushinnova.online/" target="_blank" rel="noopener noreferrer">Сайт</a>
+              <a class="action " href="https://github.com/egorbezdomniy/AgroSmena" target="_blank" rel="noopener noreferrer">GitHub</a>
+            </div>
+          </div>
+        </li>
+        <li class="project project--atp">
+          <a class="art" href="{% url 'web:portfolio:home' %}atp/" aria-label="Открыть сайт ATP">
+            <img src="{% static 'web/portfolio/previews/atp.jpg' %}" width="1120" height="601" alt="" decoding="async">
+          </a>
+          <div class="project-body">
+            <h2>ATP</h2>
+            <div class="actions">
+              <a class="action action--primary" href="{% url 'web:portfolio:home' %}atp/">Сайт</a>
+              <a class="action" href="https://github.com/egorbezdomniy/ATP" target="_blank" rel="noopener noreferrer">GitHub</a>
+            </div>
+          </div>
+        </li>
+        <li class="project project--prom">
+          <a class="art" href="{% url 'web:portfolio:home' %}promtech/" aria-label="Открыть сайт ПромТехСинергия">
+            <img src="{% static 'web/portfolio/previews/promtech.jpg' %}" width="1120" height="602" alt="" decoding="async">
+          </a>
+          <div class="project-body">
+            <h2>ПромТехСинергия</h2>
+            <div class="actions">
+              <a class="action action--primary" href="{% url 'web:portfolio:home' %}promtech/">Сайт</a>
+              <a class="action" href="https://github.com/egorbezdomniy/PromTechSinergia" target="_blank" rel="noopener noreferrer">GitHub</a>
+            </div>
+          </div>
+        </li>
+        <li class="project project--catalog">
+          <a class="art" href="{% url 'web:portfolio:home' %}agro/" aria-label="Открыть сайт agro">
+            <img src="{% static 'web/portfolio/previews/transkonvey.jpg' %}" width="1120" height="593" alt="" decoding="async">
+          </a>
+          <div class="project-body">
+            <h2>agro</h2>
+            <div class="actions">
+              <a class="action action--primary" href="{% url 'web:portfolio:home' %}agro/">Сайт</a>
+              <a class="action" href="https://github.com/egorbezdomniy/agro" target="_blank" rel="noopener noreferrer">GitHub</a>
+            </div>
+          </div>
+        </li>
+        <li class="project project--erzhanshop">
+          <a class="art" href="{% url 'web:portfolio:home' %}erzhanshop/" aria-label="Открыть сайт ErzhanShop">
+            <img src="{% static 'web/portfolio/previews/erzhanshop.jpg' %}" width="1120" height="562" alt="" decoding="async">
+          </a>
+          <div class="project-body">
+            <h2>ErzhanShop</h2>
+            <div class="actions">
+              <a class="action action--primary" href="{% url 'web:portfolio:home' %}erzhanshop/">Сайт</a>
+              <a class="action" href="https://github.com/egorbezdomniy/Test" target="_blank" rel="noopener noreferrer">GitHub</a>
+            </div>
+          </div>
+        </li>
+      </ul>
+      <nav class="carousel-controls" aria-label="Управление каруселью">
+        <button type="button" id="previous" aria-label="Предыдущий проект" aria-controls="project-track">Назад</button>
+        <div class="dots" id="project-dots" aria-label="Позиция в карусели"></div>
+        <button type="button" id="next" aria-label="Следующий проект" aria-controls="project-track">Дальше</button>
+      </nav>
+    </section>
+  </main>
+</body>
+</html>

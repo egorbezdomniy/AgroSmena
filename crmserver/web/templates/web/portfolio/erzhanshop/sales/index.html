@@ -1,0 +1,107 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'web/portfolio/demo-assets/bootstrap.min.css' %}">
+    <script src="{% static 'web/portfolio/demo-assets/bootstrap.bundle.min.js' %}" defer></script>
+    <title>История продаж ErzhanShop</title>
+    <style>
+        h4{
+            color: white;
+        }
+        h5{
+            color: white;
+        }
+        h2 {
+        font-family: 'Space Mono', monospace;
+        font-size: clamp(1.5rem, 5vw, 5rem);
+        color: white;
+        padding: 0rem clamp(1rem, 2vw, 3rem);
+        border-radius: clamp(0.4rem, 0.75vw, 1rem);
+        text-align: center;
+        }
+        h3{
+            text-align: center;
+        }
+    </style>
+<link rel="stylesheet" href="{% static 'web/portfolio/demo-assets/preview-bar.css' %}">
+</head>
+<body>
+<div class="portfolio-preview-bar"><a href="{% url 'web:portfolio:home' %}">Все проекты</a><span>Данные для демонстрации</span></div>
+    <nav class="navbar navbar-expand-lg bg-body-tertiary">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="{% url 'web:portfolio:home' %}erzhanshop/">ErzhanShop</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarText" aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse mx-5" id="navbarText">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+          <li class="nav-item">
+            <a class="nav-link active" href="{% url 'web:portfolio:home' %}erzhanshop/sales/">История продаж</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" href="{% url 'web:portfolio:home' %}erzhanshop/availability/">Наличие</a>
+          </li>
+
+        </ul>
+
+      </div>
+    </div>
+  </nav>
+  <style>
+    body{
+      overflow-x: hidden;
+    }
+  </style>
+    <h1 class="m-3">История продаж</h1>
+    <input type="button" class="btn btn-outline-light m-3" onclick="history.back();" value="Пред. страница"/>
+    <h3>Прибыль за все время </h3>
+    <h2>900 ₽</h2>
+    <ul class="list-group m-3">
+
+        <li class="list-group-item">
+            <h4>Продажа Demo-1 Блокнот A5 за 150p</h4>
+            <div>Предмет: <h5 style="display: inline;">Demo-1 Блокнот A5 </h5></div>
+            <div>Цена в закупе: <h5 style="display: inline;">120p</h5></div>
+            <div>Продано за: <h5 style="display: inline;">150p </h5></div>
+            <div>Предпологаемая маржа: <h5 style="display: inline;">30p </h5></div>
+            <div>Количество проданного товара: <h5 style="display: inline;">1</h5></div>
+            <div>Дата: <h5 style="display: inline;">Nov. 20, 2026 </h5> </div>
+        </li>
+
+        <li class="list-group-item">
+            <h4>Продажа Demo-2 Набор гелевых ручек за 300p</h4>
+            <div>Предмет: <h5 style="display: inline;">Demo-2 Набор гелевых ручек </h5></div>
+            <div>Цена в закупе: <h5 style="display: inline;">240p</h5></div>
+            <div>Продано за: <h5 style="display: inline;">300p </h5></div>
+            <div>Предпологаемая маржа: <h5 style="display: inline;">60p </h5></div>
+            <div>Количество проданного товара: <h5 style="display: inline;">2</h5></div>
+            <div>Дата: <h5 style="display: inline;">Nov. 19, 2026 </h5> </div>
+        </li>
+
+        <li class="list-group-item">
+            <h4>Продажа Demo-3 Набор текстовых маркеров за 450p</h4>
+            <div>Предмет: <h5 style="display: inline;">Demo-3 Набор текстовых маркеров </h5></div>
+            <div>Цена в закупе: <h5 style="display: inline;">360p</h5></div>
+            <div>Продано за: <h5 style="display: inline;">450p </h5></div>
+            <div>Предпологаемая маржа: <h5 style="display: inline;">90p </h5></div>
+            <div>Количество проданного товара: <h5 style="display: inline;">3</h5></div>
+            <div>Дата: <h5 style="display: inline;">Nov. 18, 2026 </h5> </div>
+        </li>
+
+        <li class="list-group-item">
+            <h4>Продажа Demo-4 Настольный органайзер за 600p</h4>
+            <div>Предмет: <h5 style="display: inline;">Demo-4 Настольный органайзер </h5></div>
+            <div>Цена в закупе: <h5 style="display: inline;">480p</h5></div>
+            <div>Продано за: <h5 style="display: inline;">600p </h5></div>
+            <div>Предпологаемая маржа: <h5 style="display: inline;">120p </h5></div>
+            <div>Количество проданного товара: <h5 style="display: inline;">4</h5></div>
+            <div>Дата: <h5 style="display: inline;">Nov. 17, 2026 </h5> </div>
+        </li>
+
+    </ul>
+</body>
+</html>

@@ -1,0 +1,71 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'web/portfolio/demo-assets/bootstrap.min.css' %}">
+    <script src="{% static 'web/portfolio/demo-assets/bootstrap.bundle.min.js' %}" defer></script>
+    <style>
+        span{
+            color: white;
+        }
+
+    </style>
+    <title>Demo-2 ErzhanShop</title>
+<link rel="stylesheet" href="{% static 'web/portfolio/demo-assets/preview-bar.css' %}">
+</head>
+<body>
+<div class="portfolio-preview-bar"><a href="{% url 'web:portfolio:home' %}">Все проекты</a><span>Данные для демонстрации</span></div>
+    <nav class="navbar navbar-expand-lg bg-body-tertiary">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="{% url 'web:portfolio:home' %}erzhanshop/">ErzhanShop</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarText" aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse mx-5" id="navbarText">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+          <li class="nav-item">
+            <a class="nav-link active" href="{% url 'web:portfolio:home' %}erzhanshop/sales/">История продаж</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" href="{% url 'web:portfolio:home' %}erzhanshop/availability/">Наличие</a>
+          </li>
+
+        </ul>
+
+      </div>
+    </div>
+  </nav>
+  <style>
+    body{
+      overflow-x: hidden;
+    }
+  </style>
+    <h1 class="m-3">Demo-2</h1>
+    <input type="button" class="btn btn-outline-light m-3" onclick="history.back();" value="Пред. страница"/>
+    <ul class="list-group m-3">
+
+
+            <li class="list-group-item">
+                <a  class="link-light"
+
+                    href="{% url 'web:portfolio:home' %}erzhanshop/pens/2/"
+                >
+                <h1>Набор гелевых ручек</h1></a>
+
+                <div>Наличие: <span >8</span></div>
+                <div>Цена: <span>240</span></div>
+                <div>Маржинальность: <span>60</span></div>
+
+                <div>Описание: <span>Вымышленная позиция для демонстрации учёта.</span></div>
+
+                <div>ID: <span>2</span></div>
+
+
+
+
+</body>
+
+</html>

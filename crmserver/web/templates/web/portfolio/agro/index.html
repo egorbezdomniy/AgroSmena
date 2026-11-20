@@ -1,0 +1,167 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ПромТехСинергия</title>
+
+    <link rel="stylesheet" href="{% static 'web/portfolio/agro/assets/main/css/index.css' %}">
+<link rel="stylesheet" href="{% static 'web/portfolio/demo-assets/preview-bar.css' %}">
+</head>
+<body>
+<div class="portfolio-preview-bar"><a href="{% url 'web:portfolio:home' %}">Все проекты</a><span>Демо-каталог</span></div>
+<header>
+
+<link rel="stylesheet" href="{% static 'web/portfolio/agro/assets/main/css/navbar.css' %}">
+
+<header class="navbar-container">
+    <div class="navbar-left">
+        <a href="{% url 'web:portfolio:home' %}agro/" class="nav-link">
+            <span class="navbar-item" id="logo">Трансконвей</span>
+        </a>
+    </div>
+    <button class="menu-toggle" aria-label="Toggle menu">
+        ☰
+    </button>
+    <nav class="navbar-right">
+        <a href="{% url 'web:portfolio:home' %}agro/catalog/" class="nav-link">
+            <span class="navbar-item">Каталог</span>
+        </a>
+        <a href="#footer" class="nav-link">
+            <span class="navbar-item">Контакты</span>
+        </a>
+    </nav>
+</header>
+<script src="{% static 'web/portfolio/agro/assets/main/js/navbar.js' %}"></script>
+
+</header>
+     <div class="hero">
+        <div class="hero-text">
+            <h1>Трансконвей</h1>
+            <p>Умные руки для вашего бизнеса</p>
+        </div>
+    </div>
+<div class="advantages-title">
+    <p class="hidden centered-text ">Наши преимущества</p>
+</div>
+<div class="advantages-container">
+
+
+<link rel="stylesheet" href="{% static 'web/portfolio/agro/assets/main/css/advantage.css' %}">
+<div class="card">
+    <div>
+      <h2 class="card-title">Подбор оборудования</h2>
+      <p class="card-date">Решения для фасовки и упаковки продукции.</p>
+    </div>
+    <div class="card-footer">
+      <div class="sticker">⚙</div>
+    </div>
+  </div>
+<script src="{% static 'web/portfolio/agro/assets/main/js/advantage.js' %}"></script>
+
+
+<link rel="stylesheet" href="{% static 'web/portfolio/agro/assets/main/css/advantage.css' %}">
+<div class="card">
+    <div>
+      <h2 class="card-title">Каталог</h2>
+      <p class="card-date">Карточки с описаниями и фотографиями оборудования.</p>
+    </div>
+    <div class="card-footer">
+      <div class="sticker">▤</div>
+    </div>
+  </div>
+<script src="{% static 'web/portfolio/agro/assets/main/js/advantage.js' %}"></script>
+
+</div>
+
+<section class="about-us">
+    <hr class="custom-hr">
+    <div class="container">
+        <div class="advantages-title">
+    <p class="hidden centered-text " style="font-size: 2.5rem;">О компании</p>
+</div>
+        <p>
+            ООО "Трансконвей" — это компания, которая предлагает высокотехнологичные решения для автоматизации сельского хозяйства.
+            Мы специализируемся на поставках роботизированной техники, включая руки-манипуляторы, которые помогают сельхозпредприятиям
+            повысить производительность и снизить затраты.
+        </p>
+        <p>
+            Наша команда работает в сфере автоматизации сельского хозяйства с 2021го года. Eё опыт и глубокое
+            понимание потребностей отрасли позволяют нам предлагать клиентам только проверенные и эффективные решения.
+        </p>
+        <p>
+            Мы разрабатываем, проектируем и реализуем производственные линии для сельхоз предприятий, которые увеличивают производительность и значительно снижают затраты.      </p>
+    </div>
+    <hr class="custom-hr">
+
+</section>
+<style>
+    .about-us {
+    padding: 50px 20px;
+    text-align: center;
+}
+
+.about-us .container {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+
+.about-us p {
+    font-size: 1.4rem;
+    line-height: 1.6;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    .about-us h2 {
+        font-size: 1.8rem;
+    }
+    .about-us p {
+        font-size: 1rem;
+    }
+}
+
+</style>
+
+
+<link rel="stylesheet" href="{% static 'web/portfolio/agro/assets/main/css/video_example.css' %}">
+<div class="container">
+    <h1 class="video-container-h1">Пример использования</h1>
+    <div class="video-container">
+    <img src="{% static 'web/portfolio/agro/assets/main/images/ref_main.jpg.webp' %}" alt="Пример оборудования" style="max-width:100%;height:auto">
+
+
+</div>
+</div>
+<div id="footer">
+    <footer id="footer" style="background-color: #2c3e50; color: #ecf0f1; padding: 20px 0; text-align: center; font-family: Arial, sans-serif;">
+  <div style="margin-bottom: 10px;">
+    <p style="margin: 5px 0; font-size: 28px;">ООО «Трансконвей»</p>
+  </div>
+  <p>Демонстрационный каталог оборудования</p>
+</footer>
+
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function(e) {
+            e.preventDefault();
+            const targetId = this.getAttribute("href").substring(1);
+            const targetElement = document.getElementById(targetId);
+            if (targetElement) {
+                window.scrollTo({
+                    top: targetElement.offsetTop,
+                    behavior: "smooth"
+                });
+            }
+        });
+    });
+});
+</script>
+
+<script src="{% static 'web/portfolio/agro/assets/main/js/index.js' %}"></script>
+</body>
+</html>

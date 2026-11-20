@@ -1,0 +1,123 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>АГРОТЕХПОДДЕРЖКА - Упаковочное оборудование и автоматизация для сельского хозяйства</title>
+
+    <link rel="stylesheet" href="{% static 'web/portfolio/atp/assets/css/style.css' %}">
+<link rel="stylesheet" href="{% static 'web/portfolio/demo-assets/preview-bar.css' %}">
+</head>
+<body>
+<div class="portfolio-preview-bar"><a href="{% url 'web:portfolio:home' %}">Все проекты</a></div>
+
+    <header class="header">
+        <div class="container header-container">
+            <a href="#" class="logo">
+                <img src="{% static 'web/portfolio/atp/assets/images/logo.svg' %}" alt="Логотип АГРОТЕХПОДДЕРЖКА"> <span class="logo-text">АГРОТЕХПОДДЕРЖКА</span>
+            </a>
+            <nav class="header-nav">
+                <a href="#about">О компании</a>
+                <a href="#services">Услуги</a>
+                <a href="#contact">Контакты</a>
+            </nav>
+        </div>
+    </header>
+
+    <section class="hero">
+        <div class="container hero-container">
+            <div class="hero-text">
+                <h1>Упаковочное оборудование под ваше производство</h1>
+                <p class="hero-subtitle">Разработка и поставка решений для автоматизации сельскохозяйственного производства любой сложности.</p>
+                <a href="#contact" class="button primary">Связаться с нами</a>
+            </div>
+        </div>
+    </section>
+
+    <section id="about" class="about">
+        <div class="container about-container">
+            <div class="section-title">
+                <h2>О компании АГРОТЕХПОДДЕРЖКА</h2>
+                <hr>
+            </div>
+            <div class="about-content">
+                <div class="about-text">
+                    <p>Компания <b>АГРОТЕХПОДДЕРЖКА</b> специализируется на предоставлении высокотехнологичных решений для автоматизации сельскохозяйственной отрасли. Наша ключевая компетенция — разработка и установка <b>упаковочного оборудования любой сложности</b>, адаптированного под уникальные требования вашего производства.</p>
+                    <p>Наша главная цель — помочь сельскохозяйственным предприятиям <b>повысить производительность</b>, оптимизировать рабочие процессы и добиться значительного <b>снижения операционных затрат</b>. Мы достигаем этого, внедряя передовые технологии автоматизации, которые отвечают самым современным стандартам качества и эффективности.</p>
+                    <p>Мы тщательно подходим к выбору оборудования, отдавая предпочтение решениям, которые отличаются <b>надежностью, функциональностью и долговечностью</b>.  АГРОТЕХПОДДЕРЖКА стремится сделать передовые автоматизированные технологии доступными для агропромышленного комплекса России, способствуя его развитию и модернизации.</p>
+                </div>
+                <div class="about-image">
+                    <img src="{% static 'web/portfolio/atp/assets/images/img_2.png.webp' %}" alt="Автоматизация сельского хозяйства от АГРОТЕХПОДДЕРЖКА" style="width: 300px; height: 250px;">
+                    <!-- Изображение: Автоматизированная ферма или сельхоз техника, сгенерированное нейросетью или стоковая фотография -->
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="services" class="services">
+        <div class="container services-container">
+            <div class="section-title">
+                <h2>Наши услуги</h2>
+                <hr>
+            </div>
+            <div class="services-grid">
+                <div class="service-item">
+                    <img class="service-item__img1" src="{% static 'web/portfolio/atp/assets/images/m1.svg' %}" alt="Разработка упаковочного оборудования">
+                    <!-- Изображение: Детали упаковочного оборудования, сгенерированное нейросетью или стоковая фотография -->
+                    <h3>Индивидуальная разработка упаковочного оборудования</h3>
+                    <p>Проектирование и создание упаковочных решений любой сложности, точно соответствующих потребностям вашего производства. Мы разрабатываем оборудование с учетом специфики вашей продукции и производственных процессов.</p>
+                </div>
+                <div class="service-item">
+                    <img class="service-item__img2" src="{% static 'web/portfolio/atp/assets/images/m2.svg' %}" alt="Автоматизация сельскохозяйственных процессов">
+                    <!-- Изображение: Роботы на сельхоз производстве, сгенерированное нейросетью или стоковая фотография -->
+                    <h3>Комплексная автоматизация сельского хозяйства</h3>
+                    <p>Внедрение автоматизированных систем для оптимизации всех этапов сельскохозяйственного производства. От сортировки и обработки урожая до управления производственными линиями, мы повышаем эффективность и снижаем зависимость от ручного труда.</p>
+                </div>
+                <div class="service-item">
+                    <img class="service-item__img3" src="{% static 'web/portfolio/atp/assets/images/m3.svg' %}" alt="Поставка и обслуживание оборудования">
+                    <!-- Изображение: Техническое обслуживание сельхоз оборудования, сгенерированное нейросетью или стоковая фотография -->
+                    <h3>Поставка, монтаж и техническое обслуживание</h3>
+                    <p>Полный спектр услуг, включающий поставку оборудования, профессиональный монтаж и настройку, а также регулярное техническое обслуживание для обеспечения бесперебойной работы ваших систем.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    <section class="example">
+        <div class="container example-container">
+            <div class="example-content">
+                <div class="example-text">
+                    <h2>Примеры оборудования</h2>
+                    <hr>
+                </div>
+                <div class="example-image-grid">
+                    <img src="{% static 'web/portfolio/atp/assets/images/img_5.jpg.webp' %}" class="example-img" alt="10-КАНАЛЬНЫЙ АВТОМАТИЧЕСКИЙ ДОЗАТОР С ПОДАЮЩИМ ЭЛЕВАТОРОМ">
+                    <img src="{% static 'web/portfolio/atp/assets/images/img_6.jpg.webp' %}" class="example-img" alt="АВТОМАТИЧЕСКИЙ УПАКОВЩИК В СЕТКУ-РУКАВ УСРД-2020">
+                    <img src="{% static 'web/portfolio/atp/assets/images/img_7.jpg.webp' %}" class="example-img" alt="10-КАНАЛЬНЫЙ АВТОМАТИЧЕСКИЙ ДОЗАТОР С ПОДАЮЩИМ ЭЛЕВАТОРОМ">
+                    <img src="{% static 'web/portfolio/atp/assets/images/img_8.jpg.webp' %}" class="example-img" alt="10-КАНАЛЬНЫЙ АВТОМАТИЧЕСКИЙ ДОЗАТОР С ПОДАЮЩИМ ЭЛЕВАТОРОМ">
+                </div>
+            </div>
+        </div>
+    </section>
+    <section id="contact" class="contact">
+        <div class="container contact-container">
+            <div class="section-title">
+                <h2>Контакты</h2>
+                <hr>
+            </div>
+            <div class="contact-info">
+                                <p>Демонстрационная страница услуг по автоматизации производства.</p>
+
+
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container footer-container">
+            <p>&copy; 2024 АГРОТЕХПОДДЕРЖКА. Все права защищены.</p>
+        </div>
+    </footer>
+
+</body>
+</html>

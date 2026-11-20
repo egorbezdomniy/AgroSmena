@@ -1,0 +1,91 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'web/portfolio/demo-assets/bootstrap.min.css' %}">
+    <script src="{% static 'web/portfolio/demo-assets/bootstrap.bundle.min.js' %}" defer></script>
+    <style>
+        span{
+            color: white;
+        }
+        h5{
+            display: inline;
+        }
+    </style>
+    <title>Наличие ErzhanShop</title>
+<link rel="stylesheet" href="{% static 'web/portfolio/demo-assets/preview-bar.css' %}">
+</head>
+<body>
+<div class="portfolio-preview-bar"><a href="{% url 'web:portfolio:home' %}">Все проекты</a><span>Данные для демонстрации</span></div>
+
+    <nav class="navbar navbar-expand-lg bg-body-tertiary">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="{% url 'web:portfolio:home' %}erzhanshop/">ErzhanShop</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarText" aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse mx-5" id="navbarText">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+          <li class="nav-item">
+            <a class="nav-link active" href="{% url 'web:portfolio:home' %}erzhanshop/sales/">История продаж</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" href="{% url 'web:portfolio:home' %}erzhanshop/availability/">Наличие</a>
+          </li>
+
+        </ul>
+
+      </div>
+    </div>
+  </nav>
+  <style>
+    body{
+      overflow-x: hidden;
+    }
+  </style>
+    <div class="container-fluid mt-3">
+        <div class="row">
+            <div class="col">
+                <a href="{% url 'web:portfolio:home' %}erzhanshop/notebooks/" class="link-light"><h1>Блокноты</h1></a>
+                <ul class="list-group">
+
+                        <li class="list-group-item"><a  class="link-light" href="{% url 'web:portfolio:home' %}erzhanshop/notebooks/brand/Demo-1/"><h5>Demo-1 </h5></a>
+                    </li>
+
+                </ul>
+            </div>
+            <div class="col">
+                <a href="{% url 'web:portfolio:home' %}erzhanshop/markers/" class="link-light"><h1>Маркеры</h1></a>
+                <ul class="list-group">
+
+                        <li class="list-group-item"><a  class="link-light" href="{% url 'web:portfolio:home' %}erzhanshop/markers/brand/Demo-3/"><h5>Demo-3 </h5></a>
+                    </li>
+
+                </ul>
+            </div>
+            <div class="col">
+                <a href="{% url 'web:portfolio:home' %}erzhanshop/pens/" class="link-light"><h1>Ручки</h1></a>
+                <ul class="list-group">
+
+                        <li class="list-group-item"><a  class="link-light" href="{% url 'web:portfolio:home' %}erzhanshop/pens/brand/Demo-2/"><h5>Demo-2 </h5></a>
+                    </li>
+
+                </ul>
+            </div>
+            <div class="col">
+                <a href="{% url 'web:portfolio:home' %}erzhanshop/organizers/" class="link-light"><h1>Органайзеры</h1></a>
+                <ul class="list-group">
+
+                        <li class="list-group-item"><a  class="link-light" href="{% url 'web:portfolio:home' %}erzhanshop/organizers/brand/Demo-4/"><h5>Demo-4 </h5></a>
+                    </li>
+
+                </ul>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

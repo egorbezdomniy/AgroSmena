@@ -1,0 +1,3 @@
+.portfolio-preview-bar{position:relative;z-index:1100;display:flex;justify-content:center;gap:.9rem;align-items:center;padding:.65rem 1rem;background:#0d172d;color:white;font:600 .9rem/1.4 system-ui,sans-serif}
+.portfolio-preview-bar a{color:inherit;text-decoration:none}.portfolio-preview-bar a:hover{text-decoration:underline}
+.portfolio-preview-bar span{font-weight:400;color:#c8d9f8}

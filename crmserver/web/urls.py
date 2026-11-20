@@ -1,9 +1,10 @@
-from django.urls import path
+from django.urls import include, path
 from web import views
 
 app_name = 'web'
 urlpatterns = [
     path('', views.LandingView.as_view(), name='landing'),
+    path('portfolio/', include('web.portfolio_urls')),
     path('dashboard/', views.DashboardView.as_view(), name='dashboard'),
     path('customers/', views.CustomerListView.as_view(), name='customers'),
     path('customers/new/', views.CustomerCreateView.as_view(), name='customer-create'),

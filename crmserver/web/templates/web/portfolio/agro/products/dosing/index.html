@@ -1,0 +1,167 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Детали Товара - ПромТехСинергия</title>
+
+    <link rel="stylesheet" href="{% static 'web/portfolio/agro/assets/main/css/detail.css' %}">
+<link rel="stylesheet" href="{% static 'web/portfolio/demo-assets/preview-bar.css' %}">
+</head>
+<header>
+
+<link rel="stylesheet" href="{% static 'web/portfolio/agro/assets/main/css/navbar.css' %}">
+
+<header class="navbar-container">
+    <div class="navbar-left">
+        <a href="{% url 'web:portfolio:home' %}agro/" class="nav-link">
+            <span class="navbar-item" id="logo">Трансконвей</span>
+        </a>
+    </div>
+    <button class="menu-toggle" aria-label="Toggle menu">
+        ☰
+    </button>
+    <nav class="navbar-right">
+        <a href="{% url 'web:portfolio:home' %}agro/catalog/" class="nav-link">
+            <span class="navbar-item">Каталог</span>
+        </a>
+        <a href="#footer" class="nav-link">
+            <span class="navbar-item">Контакты</span>
+        </a>
+    </nav>
+</header>
+<script src="{% static 'web/portfolio/agro/assets/main/js/navbar.js' %}"></script>
+
+</header>
+<head>
+    <style>
+        .product-page {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .image-gallery {
+            flex: 1;
+            max-width: 500px;
+            text-align: center;
+        }
+
+        .main-image img {
+            width: 100%;
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+        }
+
+        .thumbnail-images {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 10px;
+            overflow-x: auto;
+            padding-bottom: 10px;
+        }
+
+        .thumbnail-images img {
+            width: 60px;
+            height: 60px;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: transform 0.3s ease;
+        }
+
+        .thumbnail-images img:hover {
+            transform: scale(1.1);
+        }
+
+        .product-details {
+            flex: 1;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        .product-details h1 {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .price {
+            font-size: 20px;
+            font-weight: bold;
+            color: #e63946;
+        }
+
+        .description {
+            font-size: 16px;
+            color: #555;
+        }
+
+        @media (max-width: 768px) {
+            .product-page {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .image-gallery,
+            .product-details {
+                max-width: 100%;
+            }
+
+            .thumbnail-images img {
+                width: 50px;
+                height: 50px;
+            }
+        }
+    </style>
+    <script>
+        function changeImage(element) {
+            document.getElementById("displayed-image").src = element.src;
+        }
+    </script>
+</head>
+
+<body>
+<div class="portfolio-preview-bar"><a href="{% url 'web:portfolio:home' %}">Все проекты</a><span>Демо-каталог</span></div>
+    <div class="product-page">
+        <!-- Левая часть: Галерея изображений -->
+        <div class="image-gallery">
+            <!-- Главное изображение -->
+            <div class="main-image">
+
+                    <img src="{% static 'web/portfolio/agro/assets/main/images/image1.jpg.webp' %}" alt="Текущее изображение" id="displayed-image">
+
+            </div>
+
+            <!-- Миниатюры -->
+            <div class="thumbnail-images">
+
+                    <img src="{% static 'web/portfolio/agro/assets/main/images/image1.jpg.webp' %}" alt="Изображение 1" onclick="changeImage(this)">
+
+                    <img src="{% static 'web/portfolio/agro/assets/main/images/image2.jpg.webp' %}" alt="Изображение 2" onclick="changeImage(this)">
+
+            </div>
+        </div>
+
+        <!-- Правая часть: Детали продукта -->
+        <div class="product-details">
+            <h1>Демо-дозатор</h1>
+
+            <p class="description">Пример карточки оборудования для фасовки с дозированием.</p>
+        </div>
+    </div>
+
+<footer id="footer" style="background-color: #2c3e50; color: #ecf0f1; padding: 20px 0; text-align: center; font-family: Arial, sans-serif;">
+  <div style="margin-bottom: 10px;">
+    <p style="margin: 5px 0; font-size: 28px;">ООО «Трансконвей»</p>
+  </div>
+  <p>Демонстрационный каталог оборудования</p>
+</footer>
+
+
+<script src="{% static 'web/portfolio/agro/assets/main/js/detail.js' %}"></script>
+</body>
+</html>
