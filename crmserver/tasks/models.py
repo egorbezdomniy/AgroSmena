@@ -4,6 +4,27 @@ from django.db.models import Q
 from crmserver.models import OrganizationOwnedModel
 
 
+def lock_task_assignees(organization_id, members, *, require_active=False, usernames=None, using='default'):
+    """Validate under O -> User locks, retained by the caller's outer atomic.
+
+    Membership identity is immutable; its deletion takes O before through rows.
+    User updates do not take O, so lock those rows too, in user PK order. Inspect
+    activity/username AFTER waiting for that lock, not on cached form objects.
+    """
+    from accounts.models import Membership, Organization
+    Organization.objects.using(using).select_for_update().only('pk').get(pk=organization_id)
+    member_ids = {member.pk for member in members}
+    current = list(Membership.objects.using(using).filter(
+        organization_id=organization_id, pk__in=member_ids).select_related('user').only(
+            'pk', 'organization_id', 'user_id', 'user__username', 'user__is_active')
+        .order_by('user_id').select_for_update(of=('user',), no_key=True))
+    if ({member.pk for member in current} != member_ids
+            or (require_active and any(not member.user.is_active for member in current))
+            or (usernames is not None and {member.user.username for member in current} != set(usernames))):
+        raise ValidationError('Сотрудник не найден в организации или больше недоступен.')
+    return current
+
+
 class Task(OrganizationOwnedModel):
     class Priority(models.TextChoices):
         LOW = 'Низкий', 'Низкий'

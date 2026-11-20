@@ -11,6 +11,18 @@ class TimestampedUUIDModel(models.Model):
     class Meta:
         abstract = True
 
+    def validate_immutable_relations(self, *fields, using=None):
+        # There is no transfer operation that repairs related rows/assignments.
+        if not self.pk:
+            return
+        alias = using or self._state.db or router.db_for_read(type(self), instance=self)
+        previous = type(self).objects.using(alias).filter(pk=self.pk).values(*fields).first()
+        if previous:
+            errors = {field: 'Изменение этой связи у существующей записи не поддерживается.'
+                      for field in fields if previous[field] != getattr(self, f'{field}_id')}
+            if errors:
+                raise ValidationError(errors)
+
 
 class OrganizationOwnedModel(TimestampedUUIDModel):
     organization = models.ForeignKey('accounts.Organization', on_delete=models.PROTECT,
@@ -26,10 +38,12 @@ class OrganizationOwnedModel(TimestampedUUIDModel):
         with transaction.atomic(using=alias):
             if self.organization_id:
                 Organization.objects.using(alias).select_for_update().get(pk=self.organization_id)
+            self.validate_immutable_relations('organization', using=alias)
             return super().save(*args, **kwargs)
 
     def clean(self):
         super().clean()
+        self.validate_immutable_relations('organization')
         errors = {}
         for field in ('customer', 'deal'):
             if getattr(self, f'{field}_id', None) and self.organization_id:

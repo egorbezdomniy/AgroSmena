@@ -22,6 +22,7 @@ from customers.views import CustomerViewSet
 from deals.views import DealViewSet
 from tasks.views import TaskViewSet
 from crmserver.app_updates import AppUpdateView
+from crmserver.health import healthz
 from crmserver.installers import DownloadPageView, InstallerAdminView, InstallerDownloadView
 
 router = DefaultRouter()
@@ -30,6 +31,7 @@ router.register('deals', DealViewSet)
 router.register('tasks', TaskViewSet)
 
 urlpatterns = [
+    path('healthz/', healthz, name='healthz'),
     path('catalog/', include('catalog.urls')),
     path('download/', DownloadPageView.as_view(), name='download'),
     path('download/installer/', InstallerDownloadView.as_view(), name='installer-download'),

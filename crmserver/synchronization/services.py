@@ -1,4 +1,5 @@
 from django.db import transaction
+from django.db.models import Prefetch
 from django.core.exceptions import ValidationError as DjangoValidationError
 from uuid import UUID
 from django.utils import timezone
@@ -12,6 +13,7 @@ from deals.models import Deal
 from deals.serializers import DealSerializer
 from tasks.models import Task, visible_tasks
 from tasks.serializers import TaskSerializer
+from crmserver.observability import observe_exchange, sync_lock_acquired, sync_phase, sync_record_counts
 from .models import Tombstone
 from .signals import deletion_time
 
@@ -37,91 +39,109 @@ def serialize_record(entity, obj):
             'updated_at': obj.updated_at.isoformat(), 'deleted': False, 'fields': fields}
 
 
+@observe_exchange
 @transaction.atomic
 def exchange(request, payload):
     membership = request.crm_membership
-    organization = Organization.objects.select_for_update().get(pk=membership.organization_id)
+    # Includes DB/ORM round-trip time as well as lock wait; not a pure wait metric.
+    with sync_phase(request, 'organization_lock_acquire_ms'):
+        organization = Organization.objects.select_for_update().get(pk=membership.organization_id)
+        sync_lock_acquired(request)
     if str(organization.uuid) != str(payload['organization']):
         raise PermissionDenied('Организация локальной базы не совпадает с аккаунтом.')
-    if not Membership.objects.filter(user=request.user, organization=organization).exists():
+    # Authentication happened before the potentially long organization-lock wait.
+    if not Membership.objects.filter(pk=membership.pk, user=request.user,
+            organization=organization, user__is_active=True).exists():
         raise PermissionDenied('Доступ к организации отозван.')
-    changes = payload['changes']
-    # Apply parent deletions first so cascading tombstones participate in conflict resolution.
-    changes = sorted(changes, key=lambda row: (not row['deleted'], list(MODELS).index(row['entity'])))
-    for row in changes:
-        entity, uid, stamp = row['entity'], row['uuid'], row['updated_at']
-        model = MODELS[entity]
-        obj = model.objects.select_for_update().filter(uuid=uid).first()
-        tomb = Tombstone.objects.filter(entity=entity, uuid=uid).first()
-        if any(item and item.organization_id != organization.pk for item in (obj, tomb)):
-            raise ValidationError('Недопустимый UUID в пакете синхронизации.')
-        latest = max([item.updated_at for item in (obj, tomb) if item], default=None)
-        # Equal timestamps are resolved consistently in favor of the server.
-        if latest is not None and stamp <= latest:
-            continue
-        if entity == 'tasks' and obj and not visible_tasks(Task.objects.filter(pk=obj.pk), membership).exists():
-            raise PermissionDenied('Задача назначена другим сотрудникам.')
-        if row['deleted']:
-            if obj:
-                token = deletion_time.set(stamp)
-                try:
-                    obj.delete()
-                finally:
-                    deletion_time.reset(token)
-            Tombstone.objects.update_or_create(entity=entity, uuid=uid,
-                defaults={'organization': organization, 'updated_at': stamp})
-            continue
-        fields = dict(row['fields'])
-        for relation, related_model in [('customer', Customer), ('deal', Deal)]:
-            if (entity == 'deals' and relation == 'customer') or entity == 'tasks':
-                related_uuid = fields.pop(f'{relation}_uuid', None)
-                linked = None
-                if related_uuid:
+    with sync_phase(request, 'apply_ms'):
+        changes = payload['changes']
+        # Apply parent deletions first so cascading tombstones participate in conflict resolution.
+        changes = sorted(changes, key=lambda row: (not row['deleted'], list(MODELS).index(row['entity'])))
+        for row in changes:
+            entity, uid, stamp = row['entity'], row['uuid'], row['updated_at']
+            model = MODELS[entity]
+            obj = model.objects.select_for_update().filter(uuid=uid).first()
+            tomb = Tombstone.objects.filter(entity=entity, uuid=uid).first()
+            if any(item and item.organization_id != organization.pk for item in (obj, tomb)):
+                raise ValidationError('Недопустимый UUID в пакете синхронизации.')
+            latest = max([item.updated_at for item in (obj, tomb) if item], default=None)
+            # Equal timestamps are resolved consistently in favor of the server.
+            if latest is not None and stamp <= latest:
+                continue
+            if entity == 'tasks' and obj and not visible_tasks(Task.objects.filter(pk=obj.pk), membership).exists():
+                raise PermissionDenied('Задача назначена другим сотрудникам.')
+            if row['deleted']:
+                if obj:
+                    token = deletion_time.set(stamp)
                     try:
-                        related_uuid = UUID(str(related_uuid))
-                        linked = related_model.objects.filter(organization=organization, uuid=related_uuid).first()
-                    except (ValueError, DjangoValidationError):
-                        raise ValidationError(f'Некорректный {relation}_uuid.') from None
-                    if linked is None:
-                        # A deleted parent cannot be reintroduced by a stale child record.
-                        parent_entity = 'customers' if relation == 'customer' else 'deals'
-                        deleted_parent = Tombstone.objects.filter(organization=organization, entity=parent_entity, uuid=related_uuid).first()
-                        if deleted_parent:
-                            if entity == 'deals':
-                                if obj:
-                                    token = deletion_time.set(max(stamp, deleted_parent.updated_at))
-                                    try:
-                                        obj.delete()
-                                    finally:
-                                        deletion_time.reset(token)
-                                Tombstone.objects.update_or_create(entity=entity, uuid=uid,
-                                    defaults={'organization': organization, 'updated_at': max(stamp, deleted_parent.updated_at)})
-                                break
-                            related_uuid = None
-                        else:
-                            raise ValidationError(f'Связанная запись {relation} не найдена в организации.')
-                fields[f'{relation}_id'] = linked.pk if linked else None
-        else:
-            serializer = SERIALIZERS[entity](obj, data=fields, context={'request': request})
-            serializer.is_valid(raise_exception=True)
-            obj = serializer.save(organization=organization, uuid=uid)
-            model.objects.filter(pk=obj.pk).update(created_at=row['created_at'], updated_at=stamp)
-            if tomb:
-                tomb.delete()
-    records = []
-    for entity, model in MODELS.items():
-        queryset = model.objects.filter(organization=organization)
-        if entity == 'deals':
-            queryset = queryset.select_related('customer')
-        if entity == 'tasks':
-            queryset = visible_tasks(queryset, membership).select_related(
-                'customer', 'deal').prefetch_related('assignees__user')
-        records.extend(serialize_record(entity, obj) for obj in queryset)
-    records.extend({'entity': tomb.entity, 'uuid': str(tomb.uuid), 'updated_at': tomb.updated_at.isoformat(),
-                    'deleted': True} for tomb in Tombstone.objects.filter(organization=organization))
-    members = Membership.objects.filter(organization=organization, user__is_active=True).select_related('user')
-    return {'organization': str(organization.uuid), 'synced_at': timezone.now().isoformat(),
-            'members': [{'username': item.user.username,
-                         'name': item.user.get_full_name().strip() or item.user.username}
-                        for item in members],
-            'changes': records}
+                        obj.delete()
+                    finally:
+                        deletion_time.reset(token)
+                Tombstone.objects.update_or_create(entity=entity, uuid=uid,
+                    defaults={'organization': organization, 'updated_at': stamp})
+                continue
+            fields = dict(row['fields'])
+            for relation, related_model in [('customer', Customer), ('deal', Deal)]:
+                if (entity == 'deals' and relation == 'customer') or entity == 'tasks':
+                    related_uuid = fields.pop(f'{relation}_uuid', None)
+                    linked = None
+                    if related_uuid:
+                        try:
+                            related_uuid = UUID(str(related_uuid))
+                            linked = related_model.objects.filter(organization=organization, uuid=related_uuid).first()
+                        except (ValueError, DjangoValidationError):
+                            raise ValidationError(f'Некорректный {relation}_uuid.') from None
+                        if linked is None:
+                            # A deleted parent cannot be reintroduced by a stale child record.
+                            parent_entity = 'customers' if relation == 'customer' else 'deals'
+                            deleted_parent = Tombstone.objects.filter(organization=organization, entity=parent_entity, uuid=related_uuid).first()
+                            if deleted_parent:
+                                if entity == 'deals':
+                                    if obj:
+                                        token = deletion_time.set(max(stamp, deleted_parent.updated_at))
+                                        try:
+                                            obj.delete()
+                                        finally:
+                                            deletion_time.reset(token)
+                                    Tombstone.objects.update_or_create(entity=entity, uuid=uid,
+                                        defaults={'organization': organization, 'updated_at': max(stamp, deleted_parent.updated_at)})
+                                    break
+                                related_uuid = None
+                            else:
+                                raise ValidationError(f'Связанная запись {relation} не найдена в организации.')
+                    fields[f'{relation}_id'] = linked.pk if linked else None
+            else:
+                serializer = SERIALIZERS[entity](obj, data=fields, context={'request': request})
+                serializer.is_valid(raise_exception=True)
+                obj = serializer.save(organization=organization, uuid=uid)
+                model.objects.filter(pk=obj.pk).update(created_at=row['created_at'], updated_at=stamp)
+                if tomb:
+                    tomb.delete()
+    with sync_phase(request, 'response_prepare_ms'):
+        records = []
+        for entity, model in MODELS.items():
+            queryset = model.objects.filter(organization=organization)
+            if entity == 'deals':
+                # All primary-model fields are serialized; linked rows only supply UUIDs.
+                queryset = queryset.select_related('customer').only(
+                    *[field.attname for field in model._meta.concrete_fields], 'customer__uuid')
+            if entity == 'tasks':
+                queryset = visible_tasks(queryset, membership).select_related(
+                    'customer', 'deal').only(
+                        *[field.attname for field in model._meta.concrete_fields],
+                        'customer__uuid', 'deal__uuid').prefetch_related(Prefetch(
+                            'assignees',
+                            queryset=Membership.objects.select_related('user').only(
+                                'user_id', 'user__username').order_by('user__username'),
+                            to_attr='_sync_ordered_assignees'))
+            records.extend(serialize_record(entity, obj) for obj in queryset)
+        records.extend({'entity': tomb.entity, 'uuid': str(tomb.uuid), 'updated_at': tomb.updated_at.isoformat(),
+                        'deleted': True} for tomb in Tombstone.objects.filter(organization=organization))
+        members = Membership.objects.filter(organization=organization, user__is_active=True).select_related('user').only(
+            'user_id', 'user__username', 'user__first_name', 'user__last_name')
+        sync_record_counts(request, 'outgoing', records)
+        return {'organization': str(organization.uuid), 'synced_at': timezone.now().isoformat(),
+                'members': [{'username': item.user.username,
+                             'name': item.user.get_full_name().strip() or item.user.username}
+                            for item in members],
+                'changes': records}

@@ -6,8 +6,10 @@ from urllib.parse import urlencode
 from urllib.request import HTTPCookieProcessor, Request, build_opener
 
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
+from django.test import override_settings
 
 
+@override_settings(SESSION_COOKIE_SECURE=False, CSRF_COOKIE_SECURE=False)
 class AuthenticatedHTTPTests(StaticLiveServerTestCase):
     def test_registration_crud_and_logout_over_http(self):
         cookies = CookieJar()

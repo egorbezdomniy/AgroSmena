@@ -2,6 +2,8 @@ from decimal import Decimal
 
 from django.contrib import messages
 from django.contrib.messages.views import SuccessMessageMixin
+from django.core.exceptions import ValidationError
+from django.db import transaction
 from django.db.models import Prefetch, Q, Sum
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse, reverse_lazy
@@ -12,7 +14,7 @@ from django.views.generic import CreateView, DeleteView, DetailView, ListView, T
 
 from customers.models import Customer
 from deals.models import Deal
-from tasks.models import Task, visible_tasks
+from tasks.models import Task, visible_tasks, lock_task_assignees
 from web.forms import CustomerForm, DealForm, TaskForm
 from accounts.access import OrganizationRequiredMixin, OrganizationQuerysetMixin
 
@@ -256,6 +258,18 @@ class TaskEditor(EditorMixin):
     form_class = TaskForm
     section = 'tasks'
     success_url = reverse_lazy('web:tasks')
+
+    @transaction.atomic
+    def form_valid(self, form):
+        # Validation preceded the organization-lock wait. Keep fresh User locks
+        # through Task.save AND ModelForm.save_m2m().
+        try:
+            form.cleaned_data['assignees'] = lock_task_assignees(
+                self.organization.pk, form.cleaned_data['assignees'], require_active=True)
+        except ValidationError as exc:
+            form.add_error('assignees', exc)
+            return self.form_invalid(form)
+        return super().form_valid(form)
 
     def get_queryset(self):
         return visible_tasks(super().get_queryset(), self.membership)

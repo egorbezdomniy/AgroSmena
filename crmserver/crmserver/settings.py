@@ -15,10 +15,12 @@ from pathlib import Path
 
 from django.core.exceptions import ImproperlyConfigured
 from dotenv import load_dotenv
+from .env import env_bool, env_int, env_list, env_rate
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-load_dotenv(BASE_DIR / '.env', override=False)
+if env_bool('DJANGO_LOAD_DOTENV', True):
+    load_dotenv(BASE_DIR / '.env', override=False)
 
 
 # Quick-start development settings - unsuitable for production
@@ -30,13 +32,31 @@ if not SECRET_KEY:
     raise ImproperlyConfigured('Set DJANGO_SECRET_KEY in the environment or crmserver/.env')
 
 # SECURITY WARNING: don't run with debug turned on in production!
+
 DEBUG = os.getenv("DJANGO_DEBUG", "").strip().lower() in {"1", "true", "yes", "on"}
 
-ALLOWED_HOSTS = [host.strip() for host in os.environ.get(
-    'DJANGO_ALLOWED_HOSTS', '127.0.0.1,localhost'
-).split(',') if host.strip()]
-if 'agrosmena.onrender.com' not in ALLOWED_HOSTS:
-    ALLOWED_HOSTS.append('agrosmena.onrender.com')
+DEBUG = env_bool('DJANGO_DEBUG', False)
+if not DEBUG and (len(SECRET_KEY) < 50 or len(set(SECRET_KEY)) < 5
+                  or SECRET_KEY.startswith(('django-insecure-', 'replace-with-'))):
+    raise ImproperlyConfigured('DJANGO_SECRET_KEY must be a strong production secret')
+
+
+ALLOWED_HOSTS = env_list('DJANGO_ALLOWED_HOSTS', '127.0.0.1,localhost' if DEBUG else '')
+if not DEBUG and (not ALLOWED_HOSTS or '*' in ALLOWED_HOSTS):
+    raise ImproperlyConfigured('Set explicit DJANGO_ALLOWED_HOSTS in production; wildcard is forbidden')
+
+CSRF_TRUSTED_ORIGINS = env_list('DJANGO_CSRF_TRUSTED_ORIGINS')
+SESSION_COOKIE_SECURE = env_bool('DJANGO_SESSION_COOKIE_SECURE', not DEBUG)
+CSRF_COOKIE_SECURE = env_bool('DJANGO_CSRF_COOKIE_SECURE', not DEBUG)
+SECURE_SSL_REDIRECT = env_bool('DJANGO_SECURE_SSL_REDIRECT', False)
+SECURE_HSTS_SECONDS = env_int('DJANGO_SECURE_HSTS_SECONDS', 0)
+SECURE_HSTS_INCLUDE_SUBDOMAINS = env_bool('DJANGO_SECURE_HSTS_INCLUDE_SUBDOMAINS', False)
+SECURE_HSTS_PRELOAD = env_bool('DJANGO_SECURE_HSTS_PRELOAD', False)
+# Enable only when a trusted proxy strips client headers and supplies this header itself.
+SECURE_PROXY_SSL_HEADER = (
+    ('HTTP_X_FORWARDED_PROTO', 'https') if env_bool('DJANGO_TRUST_PROXY_SSL_HEADER', False) else None
+)
+USE_X_FORWARDED_HOST = False
 
 
 # Application definition
@@ -59,6 +79,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'crmserver.observability.RequestObservabilityMiddleware',
     'django.middleware.security.SecurityMiddleware',
     "whitenoise.middleware.WhiteNoiseMiddleware",
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -101,9 +122,17 @@ DATABASES = {
         'PASSWORD': os.environ.get('POSTGRES_PASSWORD', ''),
         'HOST': os.environ.get('POSTGRES_HOST', '127.0.0.1'),
         'PORT': os.environ.get('POSTGRES_PORT', '5432'),
-        'OPTIONS': {'connect_timeout': 5},
+        'CONN_MAX_AGE': env_int('POSTGRES_CONN_MAX_AGE', 0),
+        'CONN_HEALTH_CHECKS': env_bool('POSTGRES_CONN_HEALTH_CHECKS', True),
+        'OPTIONS': {'connect_timeout': env_int('POSTGRES_CONNECT_TIMEOUT', 5, minimum=1)},
     }
 }
+if os.environ.get('POSTGRES_SSLMODE'):
+    if os.environ['POSTGRES_SSLMODE'] not in {'disable', 'allow', 'prefer', 'require', 'verify-ca', 'verify-full'}:
+        raise ImproperlyConfigured('Invalid POSTGRES_SSLMODE')
+    DATABASES['default']['OPTIONS']['sslmode'] = os.environ['POSTGRES_SSLMODE']
+if os.environ.get('POSTGRES_SSLROOTCERT'):
+    DATABASES['default']['OPTIONS']['sslrootcert'] = os.environ['POSTGRES_SSLROOTCERT']
 
 
 # Password validation
@@ -142,6 +171,10 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
+STORAGES = {
+    'default': {'BACKEND': 'django.core.files.storage.FileSystemStorage'},
+    'staticfiles': {'BACKEND': 'whitenoise.storage.CompressedManifestStaticFilesStorage'},
+}
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 APP_UPDATE_CATALOG = os.environ.get('APP_UPDATE_CATALOG', str(BASE_DIR / 'releases' / 'catalog.json'))
 APP_INSTALLER_DIR = os.environ.get('APP_INSTALLER_DIR', str(BASE_DIR / 'releases' / 'installers'))
@@ -151,10 +184,31 @@ LOGIN_REDIRECT_URL = 'web:dashboard'
 LOGOUT_REDIRECT_URL = 'web:landing'
 
 REST_FRAMEWORK = {
+    # Ignore client-supplied X-Forwarded-For unless trusted hops are explicitly configured.
+    'NUM_PROXIES': env_int('DJANGO_THROTTLE_NUM_PROXIES', 0),
     'DEFAULT_THROTTLE_RATES': {'sync_login': '10/min'},
     'DEFAULT_PERMISSION_CLASSES': ['rest_framework.permissions.IsAuthenticated', 'accounts.permissions.HasOrganization'],
     'DEFAULT_AUTHENTICATION_CLASSES': ['rest_framework.authentication.SessionAuthentication'],
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 50,
     'DEFAULT_FILTER_BACKENDS': ['rest_framework.filters.SearchFilter'],
+}
+
+# One JSON event per response. No payloads, SQL, identifiers or exception messages.
+OBSERVABILITY_ENABLED = env_bool('OBSERVABILITY_ENABLED', True)
+OBSERVABILITY_HTTP_SAMPLE_RATE = env_rate('OBSERVABILITY_HTTP_SAMPLE_RATE', 1)
+OBSERVABILITY_SQL_ENABLED = env_bool('OBSERVABILITY_SQL_ENABLED', False)
+OBSERVABILITY_SQL_SAMPLE_RATE = env_rate('OBSERVABILITY_SQL_SAMPLE_RATE', 0.1)
+OBSERVABILITY_SYNC_ENABLED = env_bool('OBSERVABILITY_SYNC_ENABLED', True)
+OBSERVABILITY_EXCLUDE_ROUTES = env_list('OBSERVABILITY_EXCLUDE_ROUTES', 'healthz,app-update,static')
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {'diagnostics': {'()': 'crmserver.observability.EventFormatter'}},
+    'handlers': {'diagnostics': {
+        'class': 'logging.StreamHandler', 'formatter': 'diagnostics', 'stream': 'ext://sys.stdout',
+    }},
+    'loggers': {'crm.diagnostics': {
+        'handlers': ['diagnostics'], 'level': 'INFO', 'propagate': False,
+    }},
 }

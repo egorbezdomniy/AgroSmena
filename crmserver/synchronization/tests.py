@@ -214,9 +214,11 @@ class DesktopSyncTests(StaticLiveServerTestCase):
         self.assertEqual(self.customers.get(customer.id).name, 'Desktop клиент')
         self.sync.login(self.live_server_url, 'sync-user', PASSWORD)
         self.member.delete()
+        revoked_client = self.sync.client
         with self.assertRaises(SyncError):
             self.sync.synchronize()
-        self.assertIsNone(self.sync.client.token)
+        self.assertIsNone(self.sync.client)
+        self.assertIsNone(revoked_client.token)
         with self.assertRaises(SyncError):
             SyncClient('http://remote.example')
 

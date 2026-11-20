@@ -1,8 +1,9 @@
 from rest_framework import serializers
+from django.core.exceptions import ValidationError as DjangoValidationError
 from accounts.api import OrganizationSerializer
 from customers.models import Customer
 from deals.models import Deal
-from tasks.models import Task
+from tasks.models import Task, lock_task_assignees
 from accounts.access import membership_for
 from accounts.models import Membership
 
@@ -12,6 +13,10 @@ class AssigneeUsernamesField(serializers.Field):
         return instance
 
     def to_representation(self, task):
+        if hasattr(task, '_sync_ordered_assignees'):
+            # This list is explicitly ordered by the DB; querying the manager again
+            # (including order_by/values_list) would bypass the prepared prefetch.
+            return [member.user.username for member in task._sync_ordered_assignees]
         return list(task.assignees.order_by('user__username').values_list('user__username', flat=True))
 
     def to_internal_value(self, data):
@@ -62,6 +67,7 @@ class TaskSerializer(OrganizationSerializer):
 
     def create(self, validated_data):
         members = validated_data.pop('assignee_usernames', [])
+        members = self.lock_assignees(validated_data['organization'].pk, members)
         task = super().create(validated_data)
         task.assignees.set(members)
         return task
@@ -69,7 +75,16 @@ class TaskSerializer(OrganizationSerializer):
     def update(self, instance, validated_data):
         missing = object()
         members = validated_data.pop('assignee_usernames', missing)
+        if members is not missing:
+            members = self.lock_assignees(instance.organization_id, members)
         task = super().update(instance, validated_data)
         if members is not missing:
             task.assignees.set(members)
         return task
+
+    def lock_assignees(self, organization_id, members):
+        try:
+            return lock_task_assignees(organization_id, members, require_active=True,
+                                       usernames=[member.user.username for member in members])
+        except DjangoValidationError as exc:
+            raise serializers.ValidationError({'assignee_usernames': exc.messages}) from exc

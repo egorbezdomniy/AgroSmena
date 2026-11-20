@@ -33,3 +33,11 @@ class Membership(TimestampedUUIDModel):
 
     def __str__(self):
         return f'{self.user} — {self.organization}'
+
+    def clean(self):
+        super().clean()
+        self.validate_immutable_relations('organization', 'user')
+
+    def save(self, *args, **kwargs):
+        self.validate_immutable_relations('organization', 'user', using=kwargs.get('using'))
+        return super().save(*args, **kwargs)

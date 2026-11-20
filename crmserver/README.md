@@ -14,6 +14,7 @@ cd crmserver
 Copy-Item .env.example .env
 # Заполните .env параметрами отдельной существующей базы PostgreSQL 14+.
 # DJANGO_SECRET_KEY должен быть случайной длинной строкой.
+# Для локального HTTP явно установите DJANGO_DEBUG=true в .env.
 ..\.venv\Scripts\python.exe manage.py migrate
 ..\.venv\Scripts\python.exe manage.py createsuperuser
 ..\.venv\Scripts\python.exe manage.py runserver 127.0.0.1:8000
@@ -31,6 +32,8 @@ Admin доступен только системным суперпользов�
 Для публичного production отдельно настройте HTTPS, secure cookies, резервное копирование,
 ограничение попыток входа и production WSGI/ASGI-сервер. `runserver` предназначен для разработки.
 `DEBUG` по умолчанию выключен, в локальном `.env` включается явно.
+Production-настройки, диагностические события, статика, условия доверия proxy и
+план разрешённых отдельно проверок описаны в [этапе масштабирования 1](../docs/scaling-stage-1.md).
 
 ## Пользователи и организации
 
